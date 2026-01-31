@@ -4763,11 +4763,11 @@ ul.eut-fields li:last-child {
 
 @font-face {
 	font-family: 'corpus';
-	src:url('../fonts/corpus-icons/corpus.eot%3Fv=1.0.0');
-	src:url('../fonts/corpus-icons/corpus.eot%3F') format('embedded-opentype'),
-		url('../fonts/corpus-icons/corpus.woff%3Fv=1.0.0') format('woff'),
-		url('../fonts/corpus-icons/corpus.ttf%3Fv=1.0.0') format('truetype'),
-		url('../fonts/corpus-icons/corpus.svg%3Fv=1.0.0') format('svg');
+	src:url('../fonts/corpus-icons/corpus.eot');
+	src:url('../fonts/corpus-icons/corpus.eot') format('embedded-opentype'),
+		url('../fonts/corpus-icons/corpus.woff') format('woff'),
+		url('../fonts/corpus-icons/corpus.ttf') format('truetype'),
+		url('../fonts/corpus-icons/corpus.svg') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
