@@ -1,0 +1,12 @@
+name = "topfundmanager"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+# Environment variables (set these in Cloudflare Dashboard or via CLI)
+# RESEND_API_KEY = "your-resend-api-key"
+# FROM_EMAIL = "noreply@topfundmanager.com"
+# TO_EMAIL = "contact@topfundmanager.com"
+
+[vars]
+# Non-sensitive variables can go here
+# Sensitive variables like API keys should be set via dashboard or `wrangler secret put`

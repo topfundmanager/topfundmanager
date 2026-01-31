@@ -1,0 +1,14 @@
+{
+  "name": "topfundmanager",
+  "version": "1.0.0",
+  "description": "Top Fund Manager - Real Estate Investing",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev . --live-reload",
+    "deploy": "wrangler pages deploy .",
+    "preview": "wrangler pages dev ."
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

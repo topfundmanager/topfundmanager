@@ -1,0 +1,244 @@
+<!-- VIP Application Form - Replace the gform_wrapper section with this -->
+<div class="vip-form-wrapper">
+  <!-- Progress Bar -->
+  <div class="form-progress">
+    <p class="progress-text">Step 1 of 6</p>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" style="width: 16%;">
+        <span class="progress-percentage">16%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message Container -->
+  <div class="form-error"></div>
+
+  <!-- Application Form -->
+  <form id="vip-application-form" novalidate>
+
+    <!-- Step 1: Contact Information -->
+    <div id="step-1" class="form-step">
+      <h3 class="step-title">Contact Information</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="firstName">First Name<span class="required">*</span></label>
+          <input type="text" id="firstName" name="firstName" class="form-input" placeholder="First" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="lastName">Last Name<span class="required">*</span></label>
+          <input type="text" id="lastName" name="lastName" class="form-input" placeholder="Last" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="email">Email<span class="required">*</span></label>
+          <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone<span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" class="form-input" placeholder="(555) 555-5555" required>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <span></span>
+        <button type="button" class="form-btn form-next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Background -->
+    <div id="step-2" class="form-step" style="display: none;">
+      <h3 class="step-title">Background</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="howFound">How did you find out about Justin?</label>
+          <input type="text" id="howFound" name="howFound" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="previousApplication">Have you ever applied before?</label>
+          <select id="previousApplication" name="previousApplication" class="form-select">
+            <option value="">Select an option</option>
+            <option value="Yes, but I was never contacted">Yes, but I was never contacted</option>
+            <option value="Yes, but I was able to participate at the time">Yes, but I was able to participate at the time</option>
+            <option value="No, this is my 1st time applying">No, this is my 1st time applying</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="occupation">What is your current occupation?</label>
+          <input type="text" id="occupation" name="occupation" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cityState">What city and state do you live in?</label>
+          <input type="text" id="cityState" name="cityState" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="form-btn form-prev">Previous</button>
+        <button type="button" class="form-btn form-next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Real Estate Experience -->
+    <div id="step-3" class="form-step" style="display: none;">
+      <h3 class="step-title">Real Estate Experience</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="goals">What are your short term and long term goals within the real estate realm?</label>
+          <input type="text" id="goals" name="goals" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="areasNeedHelp">What areas of real estate do you need help with?<span class="required">*</span></label>
+          <select id="areasNeedHelp" name="areasNeedHelp" class="form-select" required>
+            <option value="">Select an option</option>
+            <option value="Getting started">Getting started</option>
+            <option value="Finding funding">Finding funding</option>
+            <option value="How to use credit to fund deals">How to use credit to fund deals</option>
+            <option value="Renting and rehabbing">Renting and rehabbing</option>
+            <option value="New construction">New construction</option>
+            <option value="Commercial">Commercial</option>
+            <option value="All of the above">All of the above</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="experienceLevel">What is your level of experience in real estate?<span class="required">*</span></label>
+          <select id="experienceLevel" name="experienceLevel" class="form-select" required>
+            <option value="">Select an option</option>
+            <option value="I haven't started yet">I haven't started yet</option>
+            <option value="0-1 year">0-1 year</option>
+            <option value="1-3 years">1-3 years</option>
+            <option value="3-5 years">3-5 years</option>
+            <option value="5+ years">5+ years</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="currentRealEstate">Do you currently own any real estate now?<span class="required">*</span></label>
+          <select id="currentRealEstate" name="currentRealEstate" class="form-select" required>
+            <option value="">Select an option</option>
+            <option value="None yet, but after Justin's mentorship I'll be ready.">None yet, but after Justin's mentorship I'll be ready.</option>
+            <option value="1-3">1-3</option>
+            <option value="4-6">4-6</option>
+            <option value="7-10">7-10</option>
+            <option value="10+">10+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="form-btn form-prev">Previous</button>
+        <button type="button" class="form-btn form-next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Financial Goals -->
+    <div id="step-4" class="form-step" style="display: none;">
+      <h3 class="step-title">Financial Goals</h3>
+
+      <div class="form-group">
+        <label class="form-label" for="rentalUnitsGoal">How many rental units do you want to acquire this year using Justin's strategies?</label>
+        <input type="number" id="rentalUnitsGoal" name="rentalUnitsGoal" class="form-input" min="0">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="currentIncome">What is your current monthly income?</label>
+          <input type="text" id="currentIncome" name="currentIncome" class="form-input" placeholder="$">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="targetIncome">What's your target monthly income?</label>
+          <input type="number" id="targetIncome" name="targetIncome" class="form-input" min="0" placeholder="$">
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="form-btn form-prev">Previous</button>
+        <button type="button" class="form-btn form-next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Commitment -->
+    <div id="step-5" class="form-step" style="display: none;">
+      <h3 class="step-title">Commitment</h3>
+
+      <div class="form-group">
+        <label class="form-label" for="mainObstacle">What's 1 main obstacle stopping you from achieving your monthly income goal right now?</label>
+        <textarea id="mainObstacle" name="mainObstacle" class="form-textarea"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="whySelected">Hundreds of people are applying. Why should you be selected to make the investment?</label>
+        <textarea id="whySelected" name="whySelected" class="form-textarea"></textarea>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="form-btn form-prev">Previous</button>
+        <button type="button" class="form-btn form-next">Next</button>
+      </div>
+    </div>
+
+    <!-- Step 6: Investment -->
+    <div id="step-6" class="form-step" style="display: none;">
+      <h3 class="step-title">Investment</h3>
+
+      <div class="form-group">
+        <label class="form-label" for="investmentBudget">If you qualify and are selected, how much are you prepared to invest today in coaching?<span class="required">*</span></label>
+        <select id="investmentBudget" name="investmentBudget" class="form-select" required>
+          <option value="">Select an option</option>
+          <option value="$3,000-$4,000">$3,000-$4,000</option>
+          <option value="$5,000-$6,000">$5,000-$6,000</option>
+          <option value="$7,000-$8,000">$7,000-$8,000</option>
+          <option value="$10,000+">$10,000+</option>
+        </select>
+        <p class="form-description">This question is asking how much you're willing to invest in coaching, strategy, and Justin's game plan to make millions.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="alternativeOption">What would be your next option if you're not selected for VIP 1-on-1?</label>
+          <select id="alternativeOption" name="alternativeOption" class="form-select">
+            <option value="">Select an option</option>
+            <option value="General Mentorship">General Mentorship</option>
+            <option value="VIP Mentorship">VIP Mentorship</option>
+            <option value="The Ride Along with Justin for a day">The Ride Along with Justin for a day</option>
+            <option value="Mastermind 2 day class with Justin">Mastermind 2 day class with Justin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="creditScore">How is your credit?</label>
+          <select id="creditScore" name="creditScore" class="form-select">
+            <option value="">Select an option</option>
+            <option value="599 or less">599 or less</option>
+            <option value="600-620">600-620</option>
+            <option value="620-700">620-700</option>
+            <option value="700+">700+</option>
+          </select>
+          <p class="form-description">This does not hurt you in any way and just allows Justin to help you more!</p>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="form-btn form-prev">Previous</button>
+        <button type="submit" class="form-btn form-submit">Request A Call</button>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Success Message -->
+  <div id="form-success">
+    <div class="success-icon">&#10003;</div>
+    <h2>Application Submitted!</h2>
+    <p>Thank you for applying to the VIP 1-on-1 Experience.</p>
+    <p>We'll review your application and contact you soon.</p>
+  </div>
+</div>
