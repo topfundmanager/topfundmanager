@@ -33,7 +33,7 @@ export async function onRequestPost(context) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: env.FROM_EMAIL || 'noreply@topfundmanager.com',
+        from: env.FROM_EMAIL || 'noreply@updates.topfundmanager.com',
         to: env.TO_EMAIL || 'crafted@marloweemrys.com',
         subject: `VIP 1-on-1 Experience Application: ${formData.firstName} ${formData.lastName}`,
         html: emailContent,
