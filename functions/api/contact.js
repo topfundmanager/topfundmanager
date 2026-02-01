@@ -34,7 +34,7 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         from: env.FROM_EMAIL || 'noreply@topfundmanager.com',
-        to: env.TO_EMAIL || 'contact@topfundmanager.com',
+        to: env.TO_EMAIL || 'crafted@marloweemrys.com',
         subject: `VIP 1-on-1 Experience Application: ${formData.firstName} ${formData.lastName}`,
         html: emailContent,
         reply_to: formData.email,
