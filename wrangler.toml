@@ -3,9 +3,10 @@ compatibility_date = "2024-01-01"
 pages_build_output_dir = "."
 
 # Environment variables (set these in Cloudflare Dashboard or via CLI)
-# RESEND_API_KEY = "your-resend-api-key"
-# FROM_EMAIL = "noreply@topfundmanager.com"
-# TO_EMAIL = "contact@topfundmanager.com"
+# MAILGUN_API_KEY = "your-mailgun-api-key"
+# MAILGUN_DOMAIN = "mail.topfundmanager.com"
+# FROM_EMAIL = "noreply@mail.topfundmanager.com"
+# TO_EMAIL = "crafted@marloweemrys.com"
 
 [vars]
 # Non-sensitive variables can go here

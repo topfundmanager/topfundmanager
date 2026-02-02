@@ -25,38 +25,19 @@ export async function onRequestPost(context) {
     // Build email content
     const emailContent = buildEmailContent(formData);
 
-    // Send email via Resend
-    const resendResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: env.FROM_EMAIL || 'noreply@updates.topfundmanager.com',
-        to: env.TO_EMAIL || 'crafted@marloweemrys.com',
-        subject: `VIP 1-on-1 Experience Application: ${formData.firstName} ${formData.lastName}`,
-        html: emailContent,
-        reply_to: formData.email,
-      }),
-    });
+    // Send email via Mailgun
+    const fromEmail = env.FROM_EMAIL || 'noreply@mail.topfundmanager.com';
+    const toEmail = env.TO_EMAIL || 'crafted@marloweemrys.com';
+    const subject = `VIP 1-on-1 Experience Application: ${formData.firstName} ${formData.lastName}`;
 
-    if (!resendResponse.ok) {
-      const errorData = await resendResponse.text();
-      console.error('Resend API error:', errorData);
+    try {
+      await sendMailgunEmail(env, fromEmail, toEmail, subject, emailContent, formData.email);
+    } catch (emailError) {
+      console.error('Mailgun API error:', emailError);
       return new Response(
         JSON.stringify({ success: false, error: 'Failed to send email' }),
         { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
-    }
-
-    // Store in Google Sheets (non-blocking - don't fail if this errors)
-    try {
-      if (env.GOOGLE_SERVICE_ACCOUNT_EMAIL && env.GOOGLE_PRIVATE_KEY && env.GOOGLE_SPREADSHEET_ID) {
-        await appendToGoogleSheet(env, formData);
-      }
-    } catch (sheetError) {
-      console.error('Google Sheets error (non-fatal):', sheetError);
     }
 
     return new Response(
@@ -85,154 +66,40 @@ export async function onRequestOptions() {
 }
 
 /**
- * Append form data to Google Sheets
+ * Send email via Mailgun API
  */
-async function appendToGoogleSheet(env, formData) {
-  const accessToken = await getGoogleAccessToken(env);
+async function sendMailgunEmail(env, fromEmail, toEmail, subject, htmlContent, replyTo) {
+  const mailgunApiKey = env.MAILGUN_API_KEY;
+  const mailgunDomain = env.MAILGUN_DOMAIN;
 
-  const spreadsheetId = env.GOOGLE_SPREADSHEET_ID;
-  const sheetName = env.GOOGLE_SHEET_NAME || 'Sheet1';
+  if (!mailgunApiKey || !mailgunDomain) {
+    throw new Error('Mailgun credentials not configured');
+  }
 
-  // Prepare row data with timestamp
-  const timestamp = new Date().toISOString();
-  const rowData = [
-    timestamp,
-    formData.firstName || '',
-    formData.lastName || '',
-    formData.email || '',
-    formData.phone || '',
-    formData.howFound || '',
-    formData.previousApplication || '',
-    formData.occupation || '',
-    formData.cityState || '',
-    formData.goals || '',
-    formData.areasNeedHelp || '',
-    formData.experienceLevel || '',
-    formData.currentRealEstate || '',
-    formData.rentalUnitsGoal || '',
-    formData.currentIncome || '',
-    formData.targetIncome || '',
-    formData.mainObstacle || '',
-    formData.whySelected || '',
-    formData.investmentBudget || '',
-    formData.alternativeOption || '',
-    formData.creditScore || '',
-  ];
+  const formData = new FormData();
+  formData.append('from', fromEmail);
+  formData.append('to', toEmail);
+  formData.append('subject', subject);
+  formData.append('html', htmlContent);
+  formData.append('h:Reply-To', replyTo);
 
   const response = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}!A:U:append?valueInputOption=USER_ENTERED`,
+    `https://api.mailgun.net/v3/${mailgunDomain}/messages`,
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        'Authorization': `Basic ${btoa(`api:${mailgunApiKey}`)}`,
       },
-      body: JSON.stringify({
-        values: [rowData],
-      }),
+      body: formData,
     }
   );
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Google Sheets API error: ${error}`);
+    throw new Error(`Mailgun API error: ${error}`);
   }
 
   return response.json();
-}
-
-/**
- * Get Google OAuth2 access token using service account credentials
- */
-async function getGoogleAccessToken(env) {
-  const serviceAccountEmail = env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  // The private key comes with escaped newlines, need to convert them
-  const privateKey = env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
-
-  // Create JWT header
-  const header = {
-    alg: 'RS256',
-    typ: 'JWT',
-  };
-
-  // Create JWT claims
-  const now = Math.floor(Date.now() / 1000);
-  const claims = {
-    iss: serviceAccountEmail,
-    scope: 'https://www.googleapis.com/auth/spreadsheets',
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600, // 1 hour
-  };
-
-  // Encode header and claims
-  const encodedHeader = base64UrlEncode(JSON.stringify(header));
-  const encodedClaims = base64UrlEncode(JSON.stringify(claims));
-  const signatureInput = `${encodedHeader}.${encodedClaims}`;
-
-  // Sign with RSA-SHA256
-  const signature = await signRS256(signatureInput, privateKey);
-  const jwt = `${signatureInput}.${signature}`;
-
-  // Exchange JWT for access token
-  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
-  });
-
-  if (!tokenResponse.ok) {
-    const error = await tokenResponse.text();
-    throw new Error(`Failed to get access token: ${error}`);
-  }
-
-  const tokenData = await tokenResponse.json();
-  return tokenData.access_token;
-}
-
-/**
- * Base64 URL encode a string
- */
-function base64UrlEncode(str) {
-  const base64 = btoa(str);
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-
-/**
- * Sign data with RS256 using Web Crypto API
- */
-async function signRS256(data, privateKeyPem) {
-  // Parse PEM key
-  const pemContents = privateKeyPem
-    .replace('-----BEGIN PRIVATE KEY-----', '')
-    .replace('-----END PRIVATE KEY-----', '')
-    .replace(/\s/g, '');
-
-  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
-
-  // Import the key
-  const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8',
-    binaryKey,
-    {
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: 'SHA-256',
-    },
-    false,
-    ['sign']
-  );
-
-  // Sign the data
-  const encoder = new TextEncoder();
-  const dataBuffer = encoder.encode(data);
-  const signatureBuffer = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, dataBuffer);
-
-  // Convert to base64url
-  const signatureArray = new Uint8Array(signatureBuffer);
-  const base64 = btoa(String.fromCharCode(...signatureArray));
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function buildEmailContent(data) {
