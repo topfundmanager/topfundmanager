@@ -1,12 +1,14 @@
 /**
  * Multi-step form handler for VIP 1-on-1 Experience Application
  * Uses Resend via Cloudflare Pages Functions for email delivery
+ * Includes spam prevention measures
  */
 (function() {
   'use strict';
 
   const TOTAL_STEPS = 6;
   let currentStep = 1;
+  let formLoadTime = Date.now(); // Track when form was loaded for timing validation
 
   // Form field definitions by step
   const stepFields = {
@@ -21,9 +23,27 @@
   // Required fields
   const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'areasNeedHelp', 'experienceLevel', 'currentRealEstate', 'investmentBudget'];
 
+  // Max lengths for validation (must match server)
+  const maxLengths = {
+    firstName: 50,
+    lastName: 50,
+    email: 100,
+    phone: 20,
+    howFound: 500,
+    occupation: 100,
+    cityState: 100,
+    goals: 2000,
+    areasNeedHelp: 2000,
+    mainObstacle: 2000,
+    whySelected: 2000
+  };
+
   function init() {
     const form = document.getElementById('vip-application-form');
     if (!form) return;
+
+    // Record form load time
+    formLoadTime = Date.now();
 
     // Set up navigation
     document.querySelectorAll('.form-next').forEach(btn => {
@@ -63,6 +83,7 @@
         valid = false;
         showFieldError(field, 'This field is required');
         if (!firstInvalid) firstInvalid = field;
+        return;
       }
 
       // Validate email format
@@ -70,6 +91,7 @@
         valid = false;
         showFieldError(field, 'Please enter a valid email address');
         if (!firstInvalid) firstInvalid = field;
+        return;
       }
 
       // Validate phone format
@@ -77,6 +99,23 @@
         valid = false;
         showFieldError(field, 'Please enter a valid phone number');
         if (!firstInvalid) firstInvalid = field;
+        return;
+      }
+
+      // Validate name format (letters, spaces, hyphens, apostrophes only)
+      if ((fieldName === 'firstName' || fieldName === 'lastName') && value && !isValidName(value)) {
+        valid = false;
+        showFieldError(field, 'Name can only contain letters, spaces, hyphens, and apostrophes');
+        if (!firstInvalid) firstInvalid = field;
+        return;
+      }
+
+      // Validate max length
+      if (maxLengths[fieldName] && value.length > maxLengths[fieldName]) {
+        valid = false;
+        showFieldError(field, `Maximum ${maxLengths[fieldName]} characters allowed`);
+        if (!firstInvalid) firstInvalid = field;
+        return;
       }
     });
 
@@ -100,9 +139,13 @@
   }
 
   function isValidPhone(phone) {
-    // Allow various phone formats
-    const cleaned = phone.replace(/[\s\-\(\)\.]/g, '');
-    return /^\+?[0-9]{10,15}$/.test(cleaned);
+    // Allow various phone formats: digits, spaces, dashes, parentheses, plus sign
+    return /^[\d\s\-\(\)\+]+$/.test(phone);
+  }
+
+  function isValidName(name) {
+    // Only letters, spaces, hyphens, apostrophes
+    return /^[a-zA-Z\s'-]+$/.test(name);
   }
 
   function handleNext(e) {
@@ -170,6 +213,9 @@
     for (const [key, value] of formData.entries()) {
       data[key] = value;
     }
+
+    // Add timestamp for timing validation (spam prevention)
+    data._timestamp = formLoadTime.toString();
 
     return data;
   }

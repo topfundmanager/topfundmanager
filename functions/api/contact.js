@@ -11,10 +11,42 @@ export async function onRequestPost(context) {
   try {
     const formData = await request.json();
 
+    // === SPAM PREVENTION CHECKS ===
+
+    // 1. Honeypot field - if filled, it's a bot
+    if (formData.website || formData.url || formData.company_url) {
+      console.log('Honeypot triggered - rejecting submission');
+      // Return success to not alert the bot, but don't process
+      return new Response(
+        JSON.stringify({ success: true, message: 'Application submitted successfully' }),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    // 2. Timing check - if submitted too fast (< 3 seconds), likely a bot
+    if (formData._timestamp) {
+      const submissionTime = Date.now() - parseInt(formData._timestamp, 10);
+      if (submissionTime < 3000) {
+        console.log('Form submitted too quickly - rejecting');
+        return new Response(
+          JSON.stringify({ success: true, message: 'Application submitted successfully' }),
+          { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+    }
+
+    // === INPUT VALIDATION ===
+
+    // Trim all string inputs
+    const trimmedData = {};
+    for (const [key, value] of Object.entries(formData)) {
+      trimmedData[key] = typeof value === 'string' ? value.trim() : value;
+    }
+
     // Validate required fields
     const requiredFields = ['firstName', 'lastName', 'email', 'phone'];
     for (const field of requiredFields) {
-      if (!formData[field]) {
+      if (!trimmedData[field]) {
         return new Response(
           JSON.stringify({ success: false, error: `Missing required field: ${field}` }),
           { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
@@ -22,16 +54,92 @@ export async function onRequestPost(context) {
       }
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedData.email)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Please enter a valid email address' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    // Validate name format (letters, spaces, hyphens, apostrophes only)
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
+    if (!nameRegex.test(trimmedData.firstName) || !nameRegex.test(trimmedData.lastName)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Name can only contain letters, spaces, hyphens, and apostrophes' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    // Validate phone format (digits, spaces, dashes, parentheses, plus sign)
+    const phoneRegex = /^[\d\s\-\(\)\+]+$/;
+    if (!phoneRegex.test(trimmedData.phone)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Please enter a valid phone number' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    // Validate input lengths (prevent excessively long inputs)
+    const maxLengths = {
+      firstName: 50,
+      lastName: 50,
+      email: 100,
+      phone: 20,
+      howFound: 500,
+      occupation: 100,
+      cityState: 100,
+      goals: 2000,
+      areasNeedHelp: 2000,
+      mainObstacle: 2000,
+      whySelected: 2000,
+    };
+
+    for (const [field, maxLength] of Object.entries(maxLengths)) {
+      if (trimmedData[field] && trimmedData[field].length > maxLength) {
+        return new Response(
+          JSON.stringify({ success: false, error: `${field} exceeds maximum length of ${maxLength} characters` }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+    }
+
+    // Check for suspicious patterns (common spam indicators)
+    const spamPatterns = [
+      /\[url=/i,           // BBCode links
+      /<a\s+href/i,        // HTML links
+      /https?:\/\/.*https?:\/\//i,  // Multiple URLs
+      /viagra|cialis|casino|lottery|winner|congratulations.*won/i,  // Common spam words
+    ];
+
+    const textFields = ['goals', 'areasNeedHelp', 'mainObstacle', 'whySelected', 'howFound'];
+    for (const field of textFields) {
+      if (trimmedData[field]) {
+        for (const pattern of spamPatterns) {
+          if (pattern.test(trimmedData[field])) {
+            console.log(`Spam pattern detected in ${field}`);
+            return new Response(
+              JSON.stringify({ success: true, message: 'Application submitted successfully' }),
+              { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+            );
+          }
+        }
+      }
+    }
+
+    // === PROCESS VALID SUBMISSION ===
+
     // Build email content
-    const emailContent = buildEmailContent(formData);
+    const emailContent = buildEmailContent(trimmedData);
 
     // Send email via Resend
     const fromEmail = env.FROM_EMAIL || 'noreply@updates.topfundmanager.com';
     const toEmail = env.TO_EMAIL || 'crafted@marloweemrys.com';
-    const subject = `VIP 1-on-1 Experience Application: ${formData.firstName} ${formData.lastName}`;
+    const subject = `VIP 1-on-1 Experience Application: ${trimmedData.firstName} ${trimmedData.lastName}`;
 
     try {
-      await sendResendEmail(env, fromEmail, toEmail, subject, emailContent, formData.email);
+      await sendResendEmail(env, fromEmail, toEmail, subject, emailContent, trimmedData.email);
     } catch (emailError) {
       console.error('Resend API error:', emailError);
       return new Response(

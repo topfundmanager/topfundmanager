@@ -240,6 +240,12 @@ f. Multifamily, shopping centers, hotels, mix-use developments and more.</p>
                   <div class="form-error"></div>
                   <!-- Application Form -->
                   <form id="vip-application-form" novalidate>
+                    <!-- Honeypot fields - hidden from humans, bots will fill these -->
+                    <div style="position: absolute; left: -9999px;" aria-hidden="true">
+                      <input type="text" name="website" tabindex="-1" autocomplete="off">
+                      <input type="text" name="url" tabindex="-1" autocomplete="off">
+                      <input type="text" name="company_url" tabindex="-1" autocomplete="off">
+                    </div>
                     <!-- Step 1: Contact Information -->
                     <div id="step-1" class="form-step">
                       <h4 class="step-title">Contact Information</h4>
