@@ -52,7 +52,7 @@
   display: none;
 }
 
-.form-step:first-of-type {
+#step-1 {
   display: block;
 }
 
