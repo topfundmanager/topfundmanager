@@ -25,15 +25,15 @@ export async function onRequestPost(context) {
     // Build email content
     const emailContent = buildEmailContent(formData);
 
-    // Send email via Mailgun
-    const fromEmail = env.FROM_EMAIL || 'noreply@mail.topfundmanager.com';
+    // Send email via Resend
+    const fromEmail = env.FROM_EMAIL || 'noreply@updates.topfundmanager.com';
     const toEmail = env.TO_EMAIL || 'crafted@marloweemrys.com';
     const subject = `VIP 1-on-1 Experience Application: ${formData.firstName} ${formData.lastName}`;
 
     try {
-      await sendMailgunEmail(env, fromEmail, toEmail, subject, emailContent, formData.email);
+      await sendResendEmail(env, fromEmail, toEmail, subject, emailContent, formData.email);
     } catch (emailError) {
-      console.error('Mailgun API error:', emailError);
+      console.error('Resend API error:', emailError);
       return new Response(
         JSON.stringify({ success: false, error: 'Failed to send email' }),
         { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
@@ -66,37 +66,33 @@ export async function onRequestOptions() {
 }
 
 /**
- * Send email via Mailgun API
+ * Send email via Resend API
  */
-async function sendMailgunEmail(env, fromEmail, toEmail, subject, htmlContent, replyTo) {
-  const mailgunApiKey = env.MAILGUN_API_KEY;
-  const mailgunDomain = env.MAILGUN_DOMAIN;
+async function sendResendEmail(env, fromEmail, toEmail, subject, htmlContent, replyTo) {
+  const resendApiKey = env.RESEND_API_KEY;
 
-  if (!mailgunApiKey || !mailgunDomain) {
-    throw new Error('Mailgun credentials not configured');
+  if (!resendApiKey) {
+    throw new Error('Resend API key not configured');
   }
 
-  const formData = new FormData();
-  formData.append('from', fromEmail);
-  formData.append('to', toEmail);
-  formData.append('subject', subject);
-  formData.append('html', htmlContent);
-  formData.append('h:Reply-To', replyTo);
-
-  const response = await fetch(
-    `https://api.mailgun.net/v3/${mailgunDomain}/messages`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${btoa(`api:${mailgunApiKey}`)}`,
-      },
-      body: formData,
-    }
-  );
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: toEmail,
+      subject: subject,
+      html: htmlContent,
+      reply_to: replyTo,
+    }),
+  });
 
   if (!response.ok) {
     const error = await response.text();
-    throw new Error(`Mailgun API error: ${error}`);
+    throw new Error(`Resend API error: ${error}`);
   }
 
   return response.json();
