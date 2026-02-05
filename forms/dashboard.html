@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Forms Dashboard</title>
+    <link rel="stylesheet" href="/forms/forms.css" />
+  </head>
+  <body>
+    <div class="forms-shell" id="forms-dashboard">
+      <header class="forms-header">
+        <div class="forms-brand">
+          <h1>Forms Dashboard</h1>
+          <p id="admin-email">Signed in</p>
+        </div>
+        <div class="forms-actions">
+          <button class="forms-button secondary" id="refresh">Refresh</button>
+          <button class="forms-button primary" id="logout">Log out</button>
+        </div>
+      </header>
+
+      <section class="forms-card">
+        <div class="forms-toolbar">
+          <div class="forms-field" style="min-width: 220px;">
+            <label for="site-filter">Filter by site</label>
+            <select id="site-filter">
+              <option value="">All sites</option>
+            </select>
+          </div>
+          <div class="forms-chip" id="submission-count">Loading</div>
+        </div>
+
+        <div id="dashboard-alert" class="forms-alert" hidden></div>
+
+        <div style="overflow-x: auto;">
+          <table class="forms-table">
+            <thead>
+              <tr>
+                <th>Submitted</th>
+                <th>Site</th>
+                <th>Form</th>
+                <th>Origin</th>
+                <th>Preview</th>
+              </tr>
+            </thead>
+            <tbody id="submissions-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src="/forms/forms.js"></script>
+  </body>
+</html>

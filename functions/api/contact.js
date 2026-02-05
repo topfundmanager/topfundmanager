@@ -133,6 +133,13 @@ export async function onRequestPost(context) {
     // Build email content
     const emailContent = buildEmailContent(trimmedData);
 
+    // Store in Supabase (non-blocking)
+    try {
+      await insertSupabaseSubmission(env, request, trimmedData);
+    } catch (supabaseError) {
+      console.error('Supabase insert error:', supabaseError);
+    }
+
     // Send email via Resend
     const fromEmail = env.FROM_EMAIL || 'noreply@updates.topfundmanager.com';
     const toEmail = env.TO_EMAIL || 'crafted@marloweemrys.com';
@@ -260,4 +267,39 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+async function insertSupabaseSubmission(env, request, data) {
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return;
+  }
+
+  const baseUrl = supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl;
+  const origin = request.headers.get('origin') || '';
+  const referrer = request.headers.get('referer') || '';
+  const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '';
+  const userAgent = request.headers.get('user-agent') || '';
+
+  await fetch(`${baseUrl}/rest/v1/forms_submissions`, {
+    method: 'POST',
+    headers: {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      site_id: 'topfundmanager',
+      form_id: 'vip-1on1',
+      data,
+      origin,
+      ip,
+      user_agent: userAgent,
+      page_url: referrer,
+      referrer,
+    }),
+  });
 }

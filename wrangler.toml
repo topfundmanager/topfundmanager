@@ -6,6 +6,13 @@ pages_build_output_dir = "."
 # RESEND_API_KEY = "your-resend-api-key"
 # FROM_EMAIL = "noreply@updates.topfundmanager.com"
 # TO_EMAIL = "crafted@marloweemrys.com"
+# SUPABASE_URL = "https://your-project.supabase.co"
+# SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
+# FORMS_ADMIN_EMAILS = "crafted@marloweemrys.com,info@theregurus.com"
+# FORMS_FROM_EMAIL = "noreply@updates.topfundmanager.com"
+# FORMS_CODE_TTL_MINUTES = "10"
+# FORMS_SESSION_TTL_HOURS = "168"
+# FORMS_SESSION_COOKIE = "tfm_forms_session"
 
 [vars]
 # Non-sensitive variables can go here

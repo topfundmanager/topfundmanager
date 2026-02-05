@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Forms Admin Login</title>
+    <link rel="stylesheet" href="/forms/forms.css" />
+  </head>
+  <body>
+    <div class="forms-shell">
+      <header class="forms-header">
+        <div class="forms-brand">
+          <h1>Top Fund Manager</h1>
+          <p>Forms Admin Portal</p>
+        </div>
+      </header>
+
+      <main class="forms-card">
+        <h2>Sign in with email</h2>
+        <p>We will send a six-digit code to your inbox. Enter the code to access the dashboard.</p>
+
+        <div id="alert" class="forms-alert" hidden></div>
+
+        <form id="login-form">
+          <div class="forms-field">
+            <label for="email">Admin email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required />
+          </div>
+          <div class="forms-actions">
+            <button class="forms-button primary" type="submit">Send code</button>
+          </div>
+        </form>
+
+        <form id="verify-form" hidden>
+          <div class="forms-field">
+            <label for="code">Verification code</label>
+            <input id="code" name="code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required />
+          </div>
+          <div class="forms-actions">
+            <button class="forms-button primary" type="submit">Verify and enter</button>
+            <button class="forms-button secondary" id="resend" type="button">Resend code</button>
+          </div>
+        </form>
+      </main>
+
+      <footer class="forms-footer">
+        Use an authorized admin email to access the portal.
+      </footer>
+    </div>
+
+    <script src="/forms/forms.js"></script>
+  </body>
+</html>
