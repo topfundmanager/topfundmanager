@@ -175,11 +175,70 @@ if (dashboardRoot) {
     });
   };
 
+  const formatLabel = (key) => {
+    if (!key) return 'Field';
+    return key
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  const formatValue = (value) => {
+    if (value === null || value === undefined) return '—';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (Array.isArray(value)) return value.map((entry) => String(entry)).join(', ');
+    if (typeof value === 'object') {
+      return Object.entries(value)
+        .map(([key, val]) => `${formatLabel(key)}: ${String(val)}`)
+        .join('; ');
+    }
+    return String(value);
+  };
+
   const buildPreview = (data) => {
     if (!data || typeof data !== 'object') return 'No data';
-    const keys = Object.keys(data);
-    if (keys.length === 0) return 'No fields';
-    return keys.slice(0, 3).map((key) => `${key}: ${String(data[key]).slice(0, 30)}`).join(' | ');
+    const entries = Object.entries(data);
+    if (entries.length === 0) return 'No fields';
+    return entries
+      .slice(0, 3)
+      .map(([key, value]) => `${formatLabel(key)}: ${formatValue(value).slice(0, 40)}`)
+      .join(' | ');
+  };
+
+  const buildDataGrid = (data) => {
+    const grid = document.createElement('div');
+    grid.className = 'forms-data-grid';
+
+    if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+      const row = document.createElement('div');
+      row.className = 'forms-data-row';
+      const label = document.createElement('div');
+      label.className = 'forms-data-label';
+      label.textContent = 'Info';
+      const value = document.createElement('div');
+      value.className = 'forms-data-value';
+      value.textContent = 'No form data provided.';
+      row.appendChild(label);
+      row.appendChild(value);
+      grid.appendChild(row);
+      return grid;
+    }
+
+    Object.entries(data).forEach(([key, value]) => {
+      const row = document.createElement('div');
+      row.className = 'forms-data-row';
+      const label = document.createElement('div');
+      label.className = 'forms-data-label';
+      label.textContent = formatLabel(key);
+      const valueEl = document.createElement('div');
+      valueEl.className = 'forms-data-value';
+      valueEl.textContent = formatValue(value);
+      row.appendChild(label);
+      row.appendChild(valueEl);
+      grid.appendChild(row);
+    });
+
+    return grid;
   };
 
   const renderSubmissions = (items) => {
@@ -216,11 +275,9 @@ if (dashboardRoot) {
       details.className = 'forms-details';
       const summary = document.createElement('summary');
       summary.textContent = buildPreview(item.data);
-      const pre = document.createElement('pre');
-      pre.className = 'forms-json';
-      pre.textContent = JSON.stringify(item.data || {}, null, 2);
+      const grid = buildDataGrid(item.data);
       details.appendChild(summary);
-      details.appendChild(pre);
+      details.appendChild(grid);
       previewCell.appendChild(details);
 
       row.appendChild(submittedCell);

@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap');
 
 :root {
-  color-scheme: dark;
-  --bg: #0c1116;
-  --bg-accent: #111a22;
-  --card: #0f1821;
-  --text: #f4f6f8;
-  --muted: #9aa6b2;
-  --border: #1f2a34;
+  color-scheme: light;
+  --bg: #f4f6f8;
+  --bg-accent: #eef1f4;
+  --card: #ffffff;
+  --text: #0e141b;
+  --muted: #5b6776;
+  --border: #d6dbe1;
   --accent: #f4c95d;
   --accent-strong: #f0b429;
-  --accent-2: #2aa6ff;
-  --danger: #ff6b6b;
-  --success: #4cd964;
-  --shadow: 0 30px 70px rgba(3, 6, 10, 0.45);
+  --accent-2: #1f7ddf;
+  --danger: #d04545;
+  --success: #1f9d55;
+  --shadow: 0 20px 45px rgba(8, 15, 24, 0.12);
 }
 
 * {
@@ -23,8 +23,8 @@
 body {
   margin: 0;
   font-family: 'Work Sans', sans-serif;
-  background: radial-gradient(circle at top, rgba(42, 166, 255, 0.08), transparent 55%),
-              radial-gradient(circle at 15% 20%, rgba(244, 201, 93, 0.12), transparent 50%),
+  background: radial-gradient(circle at top, rgba(31, 125, 223, 0.08), transparent 55%),
+              radial-gradient(circle at 15% 20%, rgba(244, 201, 93, 0.18), transparent 50%),
               var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -99,8 +99,8 @@ body {
 .forms-field input,
 .forms-field select,
 .forms-field textarea {
-  background: var(--bg-accent);
-  border: 1px solid transparent;
+  background: #ffffff;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px 14px;
   color: var(--text);
@@ -113,7 +113,7 @@ body {
 .forms-field select:focus,
 .forms-field textarea:focus {
   border-color: var(--accent-2);
-  box-shadow: 0 0 0 3px rgba(42, 166, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(31, 125, 223, 0.18);
 }
 
 .forms-actions {
@@ -136,7 +136,7 @@ body {
 .forms-button.primary {
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   color: #1c1c1c;
-  box-shadow: 0 12px 24px rgba(244, 201, 93, 0.2);
+  box-shadow: 0 12px 24px rgba(244, 201, 93, 0.28);
 }
 
 .forms-button.secondary {
@@ -163,14 +163,14 @@ body {
 }
 
 .forms-alert.error {
-  background: rgba(255, 107, 107, 0.14);
-  border: 1px solid rgba(255, 107, 107, 0.4);
+  background: rgba(208, 69, 69, 0.12);
+  border: 1px solid rgba(208, 69, 69, 0.35);
   color: var(--danger);
 }
 
 .forms-alert.success {
-  background: rgba(76, 217, 100, 0.14);
-  border: 1px solid rgba(76, 217, 100, 0.4);
+  background: rgba(31, 157, 85, 0.12);
+  border: 1px solid rgba(31, 157, 85, 0.35);
   color: var(--success);
 }
 
@@ -217,24 +217,11 @@ body {
   gap: 8px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(42, 166, 255, 0.12);
-  color: #9bd4ff;
+  background: rgba(31, 125, 223, 0.12);
+  color: #1f7ddf;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-}
-
-.forms-json {
-  background: #0a0f14;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  margin-top: 10px;
-  max-height: 220px;
-  overflow: auto;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 12px;
-  color: #d1d9e0;
 }
 
 .forms-details summary {
@@ -246,6 +233,43 @@ body {
 
 .forms-details summary::-webkit-details-marker {
   display: none;
+}
+
+.forms-data-grid {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.forms-data-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) 1fr;
+  gap: 12px;
+  font-size: 13px;
+  align-items: start;
+}
+
+.forms-data-label {
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+}
+
+.forms-data-value {
+  color: var(--text);
+  word-break: break-word;
+}
+
+@media (max-width: 720px) {
+  .forms-data-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .forms-footer {
