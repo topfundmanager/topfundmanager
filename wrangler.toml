@@ -13,6 +13,8 @@ pages_build_output_dir = "."
 # FORMS_CODE_TTL_MINUTES = "10"
 # FORMS_SESSION_TTL_HOURS = "168"
 # FORMS_SESSION_COOKIE = "tfm_forms_session"
+# TOPFUNDNETWORK_FORMS_API_URL = "https://topfundnetwork.com/api/forms/import"
+# TOPFUNDNETWORK_FORMS_API_KEY = "shared-import-key"
 
 [vars]
 # Non-sensitive variables can go here

@@ -1,3 +1,5 @@
+import { forwardSubmissionToTopFundNetwork } from './_topfundnetwork-import.js';
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -114,6 +116,20 @@ export async function onRequestPost(context) {
       await insertSupabaseSubmission(env, request, trimmedData);
     } catch (supabaseError) {
       console.error('Supabase insert error:', supabaseError);
+    }
+
+    // Forward to the shared TopFundNetwork intake API (non-blocking).
+    try {
+      await forwardSubmissionToTopFundNetwork(env, request, {
+        formId: 'cash-offer',
+        formName: 'Cash Offer Request',
+        contactName: `${trimmedData.firstName} ${trimmedData.lastName}`.trim(),
+        contactEmail: trimmedData.email,
+        contactPhone: trimmedData.phone,
+        submission: trimmedData,
+      });
+    } catch (importError) {
+      console.error('TopFundNetwork import error:', importError);
     }
 
     // Send email via Resend
