@@ -76,8 +76,16 @@ In Cloudflare Dashboard > Pages > Your Project > Settings > Environment variable
 | `RESEND_API_KEY` | `re_xxxxx...` | Your Resend API key |
 | `FROM_EMAIL` | `noreply@topfundmanager.com` | Sender email (must be verified in Resend) |
 | `TO_EMAIL` | `contact@topfundmanager.com` | Where form submissions are sent |
-| `TOPFUNDNETWORK_FORMS_API_URL` | `https://topfundnetwork.com/api/forms/import` | Shared import endpoint on TopFundNetwork |
-| `TOPFUNDNETWORK_FORMS_API_KEY` | `your-shared-import-key` | Shared secret used to authenticate imports into TopFundNetwork |
+| `SUPABASE_URL` | `https://your-project.supabase.co` | Supabase project used by the portal and intake APIs |
+| `SUPABASE_SERVICE_ROLE_KEY` | `your-service-role-key` | Service-role key used by Cloudflare Functions only |
+| `FORMS_ADMIN_EMAILS` | `admin@example.com` | Comma-separated emails allowed into the forms portal |
+| `FORMS_FROM_EMAIL` | `noreply@topfundmanager.com` | Sender for portal login codes |
+| `FORMS_IMPORT_API_KEY` | `your-shared-import-key` | Shared secret for server-to-server imports into this site |
+
+Top Fund Manager is the primary forms destination. External sites can submit directly to:
+
+- Browser/client form endpoint: `POST https://topfundmanager.com/api/forms/submit` with `X-Forms-Site-Key`
+- Server-to-server import endpoint: `POST https://topfundmanager.com/api/forms/import` with `X-Forms-Import-Key`
 
 **Important:** For `FROM_EMAIL`, you need to either:
 - Verify your domain in Resend (recommended), or
