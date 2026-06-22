@@ -8,46 +8,65 @@
     <link rel="stylesheet" href="/forms/forms.css" />
   </head>
   <body>
-    <div class="forms-shell" id="forms-dashboard">
-      <header class="forms-header">
-        <div class="forms-brand">
-          <h1>Forms Dashboard</h1>
-          <p id="admin-email">Signed in</p>
+    <div class="forms-shell dashboard-shell" id="forms-dashboard">
+      <header class="dashboard-header">
+        <div class="dashboard-header__brand">
+          <img class="dashboard-header__logo" src="/forms/top-fund-manager-logo.png" alt="Top Fund Manager" />
+          <div class="dashboard-header__identity">
+            <span class="dashboard-header__eyebrow">Operations Workspace</span>
+            <span class="dashboard-header__user" id="admin-email">Signed in</span>
+          </div>
         </div>
-        <div class="forms-actions">
-          <button class="forms-button secondary" id="refresh">Refresh</button>
-          <button class="forms-button primary" id="logout">Log out</button>
-        </div>
+
+        <nav class="workspace-tabs" role="tablist" aria-label="Forms dashboard navigation">
+          <button class="workspace-tab workspace-tab--active" role="tab" aria-selected="true" type="button">
+            Submissions
+          </button>
+          <button class="workspace-tab" id="refresh" type="button">Refresh</button>
+          <button class="workspace-tab workspace-tab--danger" id="logout" type="button">Log out</button>
+        </nav>
       </header>
 
-      <section class="forms-card">
-        <div class="forms-toolbar">
-          <div class="forms-field" style="min-width: 220px;">
-            <label for="site-filter">Filter by site</label>
-            <select id="site-filter">
-              <option value="">All sites</option>
-            </select>
-          </div>
-          <div class="forms-chip" id="submission-count">Loading</div>
-        </div>
+      <main class="dashboard-content transition-panel">
+        <section class="section slide-up">
+          <article class="forms-card imported-forms-panel">
+            <div class="imported-forms-panel__intro">
+              <p class="panel-card__tag">Submissions</p>
+              <h1>Forms Dashboard</h1>
+              <p>Review incoming leads from Top Fund Manager and connected satellite sites.</p>
+            </div>
 
-        <div id="dashboard-alert" class="forms-alert" hidden></div>
+            <div class="forms-toolbar imported-forms-toolbar">
+              <div class="forms-field">
+                <label for="site-filter">Filter by site</label>
+                <select id="site-filter">
+                  <option value="">All sites</option>
+                </select>
+              </div>
+              <div class="forms-chip imported-forms-count" id="submission-count">Loading</div>
+            </div>
 
-        <div style="overflow-x: auto;">
-          <table class="forms-table">
-            <thead>
-              <tr>
-                <th>Submitted</th>
-                <th>Site</th>
-                <th>Form</th>
-                <th>Origin</th>
-                <th>Preview</th>
-              </tr>
-            </thead>
-            <tbody id="submissions-body"></tbody>
-          </table>
-        </div>
-      </section>
+            <div id="dashboard-alert" class="forms-alert" hidden></div>
+
+            <div class="imported-forms-list">
+              <div class="imported-forms-table-wrap">
+                <table class="forms-table imported-forms-table">
+                  <thead>
+                    <tr>
+                      <th>Submitted</th>
+                      <th>Site</th>
+                      <th>Form</th>
+                      <th>Origin</th>
+                      <th>Preview</th>
+                    </tr>
+                  </thead>
+                  <tbody id="submissions-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
     </div>
 
     <script src="/forms/forms.js"></script>
