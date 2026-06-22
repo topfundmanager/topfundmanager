@@ -402,8 +402,18 @@ form:not([hidden]) {
   border: 1px solid rgba(31, 157, 85, 0.24);
 }
 
+/* Grid/flex children default to min-width:auto, which lets a wide child (the
+   submissions table) push past the card border. Allow them to shrink so the
+   table wrapper's overflow can contain it instead. */
+.forms-card > *,
+.imported-forms-list {
+  min-width: 0;
+}
+
 .imported-forms-table-wrap {
-  overflow: auto;
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .forms-table {
