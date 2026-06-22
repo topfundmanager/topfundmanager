@@ -157,6 +157,7 @@ if (dashboardRoot) {
   const dashboardAlert = document.getElementById('dashboard-alert');
   const refreshButton = document.getElementById('refresh');
   const logoutButton = document.getElementById('logout');
+  let activeModal = null;
 
   const loadSession = async () => {
     const data = await apiRequest('/api/forms/me');
@@ -195,9 +196,31 @@ if (dashboardRoot) {
     return String(value);
   };
 
+  const formatTimestamp = (value) => {
+    if (!value) return '—';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return String(value);
+    return parsed.toLocaleString();
+  };
+
+  const getImportMeta = (item) => {
+    const data = item?.data;
+    const imported = data && typeof data === 'object' && !Array.isArray(data) ? data._import : null;
+    return imported && typeof imported === 'object' && !Array.isArray(imported) ? imported : {};
+  };
+
+  const getSubmissionFields = (item) => {
+    const data = item?.data;
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return {};
+
+    return Object.fromEntries(
+      Object.entries(data).filter(([key]) => key !== '_import')
+    );
+  };
+
   const buildPreview = (data) => {
     if (!data || typeof data !== 'object') return 'No data';
-    const entries = Object.entries(data);
+    const entries = Object.entries(data).filter(([key]) => key !== '_import');
     if (entries.length === 0) return 'No fields';
     return entries
       .slice(0, 3)
@@ -241,8 +264,171 @@ if (dashboardRoot) {
     return grid;
   };
 
+  const appendMetaCard = (parent, label, value) => {
+    const card = document.createElement('div');
+    card.className = 'forms-modal-card';
+    const labelEl = document.createElement('span');
+    labelEl.textContent = label;
+    const valueEl = document.createElement('strong');
+    valueEl.textContent = value || '—';
+    card.appendChild(labelEl);
+    card.appendChild(valueEl);
+    parent.appendChild(card);
+  };
+
+  const appendDisclosure = (parent, title, countLabel, body) => {
+    const disclosure = document.createElement('details');
+    disclosure.className = 'forms-modal-disclosure';
+
+    const summary = document.createElement('summary');
+    const label = document.createElement('strong');
+    label.textContent = title;
+    const count = document.createElement('span');
+    count.textContent = countLabel;
+    summary.appendChild(label);
+    summary.appendChild(count);
+
+    const content = document.createElement('div');
+    content.className = 'forms-modal-disclosure__body';
+    content.appendChild(body);
+
+    disclosure.appendChild(summary);
+    disclosure.appendChild(content);
+    parent.appendChild(disclosure);
+  };
+
+  const closeSubmissionModal = () => {
+    if (!activeModal) return;
+    activeModal.remove();
+    activeModal = null;
+    document.body.classList.remove('forms-modal-open');
+  };
+
+  const openSubmissionModal = (item) => {
+    closeSubmissionModal();
+
+    const importMeta = getImportMeta(item);
+    const fields = getSubmissionFields(item);
+    const fieldCount = Object.keys(fields).length;
+    const importMetaWithoutContacts = Object.fromEntries(
+      Object.entries(importMeta).filter(([key]) => !['contactName', 'contactEmail', 'contactPhone'].includes(key))
+    );
+
+    const modal = document.createElement('div');
+    modal.className = 'forms-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Submission detail');
+
+    const backdrop = document.createElement('button');
+    backdrop.className = 'forms-modal__backdrop';
+    backdrop.type = 'button';
+    backdrop.setAttribute('aria-label', 'Close submission detail');
+    backdrop.addEventListener('click', closeSubmissionModal);
+
+    const panel = document.createElement('div');
+    panel.className = 'forms-modal__panel';
+
+    const header = document.createElement('div');
+    header.className = 'forms-modal__header';
+
+    const heading = document.createElement('div');
+    heading.className = 'forms-modal__heading';
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'panel-card__tag';
+    eyebrow.textContent = `${importMeta.siteName || item.site_id || 'Submission'} / ${importMeta.formName || item.form_id || 'Form'}`;
+    const title = document.createElement('h2');
+    title.textContent = importMeta.contactName || fields.name || fields.full_name || fields.email || 'Form submission';
+    const subtitle = document.createElement('p');
+    subtitle.textContent = formatTimestamp(item.submitted_at);
+    heading.appendChild(eyebrow);
+    heading.appendChild(title);
+    heading.appendChild(subtitle);
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'forms-button secondary forms-modal__close';
+    closeButton.type = 'button';
+    closeButton.textContent = 'Close';
+    closeButton.addEventListener('click', closeSubmissionModal);
+
+    header.appendChild(heading);
+    header.appendChild(closeButton);
+
+    const content = document.createElement('div');
+    content.className = 'forms-modal__content';
+
+    const metaGrid = document.createElement('div');
+    metaGrid.className = 'forms-modal-meta';
+    appendMetaCard(metaGrid, 'Email', importMeta.contactEmail || fields.email || fields.Email || '—');
+    appendMetaCard(metaGrid, 'Phone', importMeta.contactPhone || fields.phone || fields.Phone || '—');
+    appendMetaCard(metaGrid, 'Source page', item.page_url || item.referrer || '—');
+    content.appendChild(metaGrid);
+
+    const section = document.createElement('section');
+    section.className = 'forms-modal-section';
+    const sectionHeader = document.createElement('div');
+    sectionHeader.className = 'forms-modal-section__heading';
+    const sectionTitle = document.createElement('h3');
+    sectionTitle.textContent = 'Submitted fields';
+    const sectionNote = document.createElement('p');
+    sectionNote.textContent = `${fieldCount} field${fieldCount === 1 ? '' : 's'}`;
+    sectionHeader.appendChild(sectionTitle);
+    sectionHeader.appendChild(sectionNote);
+    section.appendChild(sectionHeader);
+    section.appendChild(buildDataGrid(fields));
+    content.appendChild(section);
+
+    const sourceGrid = document.createElement('div');
+    sourceGrid.className = 'forms-data-grid forms-data-grid--single';
+    [
+      ['Site ID', item.site_id],
+      ['Form ID', item.form_id],
+      ['Origin', item.origin],
+      ['Referrer', item.referrer],
+      ['IP', item.ip],
+      ['Imported at', importMeta.importedAt],
+    ].forEach(([label, value]) => {
+      const row = document.createElement('div');
+      row.className = 'forms-data-row';
+      const labelEl = document.createElement('div');
+      labelEl.className = 'forms-data-label';
+      labelEl.textContent = label;
+      const valueEl = document.createElement('div');
+      valueEl.className = 'forms-data-value';
+      valueEl.textContent = label.includes('at') ? formatTimestamp(value) : formatValue(value);
+      row.appendChild(labelEl);
+      row.appendChild(valueEl);
+      sourceGrid.appendChild(row);
+    });
+    appendDisclosure(content, 'Source details', '6 items', sourceGrid);
+
+    if (Object.keys(importMetaWithoutContacts).length > 0) {
+      appendDisclosure(
+        content,
+        'Import metadata',
+        `${Object.keys(importMetaWithoutContacts).length} items`,
+        buildDataGrid(importMetaWithoutContacts)
+      );
+    }
+
+    const raw = document.createElement('pre');
+    raw.className = 'forms-modal-raw';
+    raw.textContent = JSON.stringify(item.data || {}, null, 2);
+    appendDisclosure(content, 'Raw payload', 'JSON', raw);
+
+    panel.appendChild(header);
+    panel.appendChild(content);
+    modal.appendChild(backdrop);
+    modal.appendChild(panel);
+    document.body.appendChild(modal);
+    document.body.classList.add('forms-modal-open');
+    activeModal = modal;
+    closeButton.focus();
+  };
+
   const renderSubmissions = (items) => {
     submissionsBody.innerHTML = '';
+    closeSubmissionModal();
 
     if (!items.length) {
       const row = document.createElement('tr');
@@ -257,9 +443,13 @@ if (dashboardRoot) {
 
     items.forEach((item) => {
       const row = document.createElement('tr');
+      row.className = 'forms-table__row';
+      row.tabIndex = 0;
+      row.setAttribute('role', 'button');
+      row.setAttribute('aria-label', `Open submission from ${item.site_id || 'unknown site'}`);
 
       const submittedCell = document.createElement('td');
-      submittedCell.textContent = new Date(item.submitted_at).toLocaleString();
+      submittedCell.textContent = formatTimestamp(item.submitted_at);
 
       const siteCell = document.createElement('td');
       siteCell.textContent = item.site_id;
@@ -271,20 +461,29 @@ if (dashboardRoot) {
       originCell.textContent = item.origin || '—';
 
       const previewCell = document.createElement('td');
-      const details = document.createElement('details');
-      details.className = 'forms-details';
-      const summary = document.createElement('summary');
-      summary.textContent = buildPreview(item.data);
-      const grid = buildDataGrid(item.data);
-      details.appendChild(summary);
-      details.appendChild(grid);
-      previewCell.appendChild(details);
+      const preview = document.createElement('button');
+      preview.className = 'forms-preview-button';
+      preview.type = 'button';
+      preview.textContent = buildPreview(item.data);
+      preview.addEventListener('click', (event) => {
+        event.stopPropagation();
+        openSubmissionModal(item);
+      });
+      previewCell.appendChild(preview);
 
       row.appendChild(submittedCell);
       row.appendChild(siteCell);
       row.appendChild(formCell);
       row.appendChild(originCell);
       row.appendChild(previewCell);
+
+      row.addEventListener('click', () => openSubmissionModal(item));
+      row.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openSubmissionModal(item);
+        }
+      });
 
       submissionsBody.appendChild(row);
     });
@@ -331,6 +530,12 @@ if (dashboardRoot) {
       setAlert(dashboardAlert, error.message || 'Unable to log out.');
     } finally {
       window.location.href = '/forms/index.html';
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeSubmissionModal();
     }
   });
 

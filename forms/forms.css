@@ -42,6 +42,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body.forms-modal-open {
+  overflow: hidden;
+}
+
 button,
 input,
 select,
@@ -427,8 +431,17 @@ form:not([hidden]) {
   transition: background 180ms ease;
 }
 
+.forms-table__row {
+  cursor: pointer;
+}
+
 .forms-table tbody tr:hover {
   background: rgba(255, 255, 255, 0.68);
+}
+
+.forms-table__row:focus-visible {
+  outline: 3px solid rgba(0, 113, 227, 0.24);
+  outline-offset: -3px;
 }
 
 .forms-table tbody tr:last-child td {
@@ -440,26 +453,24 @@ form:not([hidden]) {
   color: var(--surface-ink);
 }
 
-.forms-details {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.46);
-}
-
-.forms-details summary {
+.forms-preview-button {
+  width: 100%;
+  min-width: 16rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.15rem;
-  list-style: none;
-  cursor: pointer;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.52);
   color: var(--surface-ink);
+  cursor: pointer;
   font-weight: 600;
+  text-align: left;
 }
 
-.forms-details summary::after {
+.forms-preview-button::after {
   content: "View";
   min-width: 3.5rem;
   padding: 0.35rem 0.65rem;
@@ -471,12 +482,11 @@ form:not([hidden]) {
   text-align: center;
 }
 
-.forms-details[open] summary::after {
-  content: "Hide";
-}
-
-.forms-details summary::-webkit-details-marker {
-  display: none;
+.forms-preview-button:hover,
+.forms-preview-button:focus-visible {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(0, 113, 227, 0.24);
+  outline: none;
 }
 
 .forms-data-grid {
@@ -510,6 +520,187 @@ form:not([hidden]) {
   word-break: break-word;
 }
 
+.forms-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 420;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 2rem 1.5rem;
+}
+
+.forms-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(12, 18, 28, 0.42);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.forms-modal__panel {
+  position: relative;
+  width: min(820px, 100%);
+  max-height: calc(100vh - 4rem);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 249, 255, 0.94));
+  box-shadow: 0 40px 100px -44px rgba(15, 23, 42, 0.68);
+  animation: modalSlideIn 180ms cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.forms-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 1.75rem;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 250, 255, 0.88));
+}
+
+.forms-modal__heading {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.forms-modal__heading h2 {
+  margin: 0;
+  color: var(--surface-ink);
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.forms-modal__heading p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.forms-modal__close {
+  flex: 0 0 auto;
+}
+
+.forms-modal__content {
+  display: grid;
+  gap: 1.25rem;
+  overflow: auto;
+  padding: 1.5rem 1.75rem 1.75rem;
+}
+
+.forms-modal-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.forms-modal-card {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.forms-modal-card span,
+.forms-modal-section__heading p {
+  display: block;
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.forms-modal-card strong {
+  color: var(--surface-ink);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.forms-modal-section {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.forms-modal-section__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.forms-modal-section__heading h3 {
+  margin: 0;
+  color: var(--surface-ink);
+  font-size: 1rem;
+}
+
+.forms-modal-section__heading p {
+  margin: 0;
+}
+
+.forms-modal-disclosure {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.46);
+}
+
+.forms-modal-disclosure summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  list-style: none;
+  cursor: pointer;
+  color: var(--surface-ink);
+}
+
+.forms-modal-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.forms-modal-disclosure summary span {
+  min-width: 3.5rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.forms-modal-disclosure__body {
+  padding: 0 1.15rem 1.15rem;
+}
+
+.forms-modal-raw {
+  margin: 0;
+  max-height: 22rem;
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--surface-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 .forms-footer {
   width: min(640px, 100%);
   margin: 1rem auto 0;
@@ -539,9 +730,22 @@ form:not([hidden]) {
   }
 }
 
+@keyframes modalSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 900px) {
   .forms-toolbar,
-  .forms-data-row {
+  .forms-data-row,
+  .forms-modal-meta {
     grid-template-columns: 1fr;
   }
 
@@ -621,7 +825,26 @@ form:not([hidden]) {
     padding: 0.85rem 0.7rem;
   }
 
-  .forms-details summary {
+  .forms-preview-button {
     min-width: 18rem;
+  }
+
+  .forms-modal {
+    align-items: end;
+    padding: calc(4.5rem + env(safe-area-inset-top)) 1rem 1rem;
+  }
+
+  .forms-modal__panel {
+    max-height: calc(100vh - 2rem);
+    border-radius: 22px;
+  }
+
+  .forms-modal__header {
+    flex-wrap: wrap;
+    padding: 1.2rem;
+  }
+
+  .forms-modal__content {
+    padding: 1.2rem;
   }
 }
