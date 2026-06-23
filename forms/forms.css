@@ -68,6 +68,10 @@ summary {
   padding: 2rem 0 4rem;
 }
 
+.forms-shell:not(.dashboard-shell) {
+  width: min(760px, calc(100% - 2rem));
+}
+
 .dashboard-shell {
   width: 100%;
   max-width: 100%;
@@ -92,6 +96,10 @@ summary {
   border-top: 0;
   border-radius: 0 0 24px 24px;
   box-shadow: 0 14px 30px -24px rgba(13, 24, 45, 0.45);
+}
+
+.forms-shell:not(.dashboard-shell) .forms-header {
+  width: 100%;
 }
 
 .dashboard-header {
@@ -208,9 +216,9 @@ summary {
 }
 
 .dashboard-content {
-  width: min(1200px, 100%);
+  width: min(1260px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0;
 }
 
 .section,
@@ -228,14 +236,28 @@ summary {
   padding: 2.5rem;
 }
 
+.dashboard-content > .section {
+  margin-top: 1.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .forms-card {
   display: grid;
   gap: 1.5rem;
   padding: 2rem;
 }
 
+.dashboard-content .forms-card {
+  padding: clamp(2rem, 4vw, 3.25rem);
+}
+
 main.forms-card {
-  width: min(640px, 100%);
+  width: 100%;
   margin: 2rem auto 0;
 }
 
@@ -253,7 +275,7 @@ main.forms-card {
 }
 
 .imported-forms-panel {
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .imported-forms-panel__intro {
@@ -271,8 +293,8 @@ main.forms-card {
 
 .forms-toolbar {
   display: grid;
-  grid-template-columns: minmax(14rem, 1fr) auto;
-  gap: 1rem;
+  grid-template-columns: minmax(18rem, 1fr) max-content;
+  gap: 1.25rem;
   align-items: end;
 }
 
@@ -419,14 +441,41 @@ form:not([hidden]) {
 .forms-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .forms-table th,
 .forms-table td {
-  padding: 1rem 0.9rem;
+  padding: 1.05rem 0.85rem;
   text-align: left;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.forms-table th:nth-child(1),
+.forms-table td:nth-child(1) {
+  width: 15%;
+}
+
+.forms-table th:nth-child(2),
+.forms-table td:nth-child(2) {
+  width: 15%;
+}
+
+.forms-table th:nth-child(3),
+.forms-table td:nth-child(3) {
+  width: 14%;
+}
+
+.forms-table th:nth-child(4),
+.forms-table td:nth-child(4) {
+  width: 24%;
+}
+
+.forms-table th:nth-child(5),
+.forms-table td:nth-child(5) {
+  width: 32%;
 }
 
 .forms-table th {
@@ -465,7 +514,7 @@ form:not([hidden]) {
 
 .forms-preview-button {
   width: 100%;
-  min-width: 16rem;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
