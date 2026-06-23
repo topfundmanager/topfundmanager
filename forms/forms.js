@@ -164,6 +164,14 @@ if (dashboardRoot) {
     adminEmail.textContent = data.email;
   };
 
+  const getSiteDisplayName = (siteId, siteName) => {
+    if (siteId === 'theregurus' || siteName === 'The RE Gurus') {
+      return 'The Regurus';
+    }
+
+    return siteName || siteId || '—';
+  };
+
   const loadSites = async () => {
     const data = await apiRequest('/api/forms/sites');
     const sites = data.sites || [];
@@ -171,7 +179,7 @@ if (dashboardRoot) {
     sites.forEach((site) => {
       const option = document.createElement('option');
       option.value = site.site_id;
-      option.textContent = site.site_name || site.site_id;
+      option.textContent = getSiteDisplayName(site.site_id, site.site_name);
       siteFilter.appendChild(option);
     });
   };
@@ -336,7 +344,7 @@ if (dashboardRoot) {
     heading.className = 'forms-modal__heading';
     const eyebrow = document.createElement('p');
     eyebrow.className = 'panel-card__tag';
-    eyebrow.textContent = `${importMeta.siteName || item.site_id || 'Submission'} / ${importMeta.formName || item.form_id || 'Form'}`;
+    eyebrow.textContent = `${getSiteDisplayName(item.site_id, importMeta.siteName)} / ${importMeta.formName || item.form_id || 'Form'}`;
     const title = document.createElement('h2');
     title.textContent = importMeta.contactName || fields.name || fields.full_name || fields.email || 'Form submission';
     const subtitle = document.createElement('p');
@@ -454,7 +462,7 @@ if (dashboardRoot) {
 
       const siteCell = document.createElement('td');
       siteCell.dataset.label = 'Site';
-      siteCell.textContent = item.site_id;
+      siteCell.textContent = getSiteDisplayName(item.site_id, getImportMeta(item).siteName);
 
       const formCell = document.createElement('td');
       formCell.dataset.label = 'Form';
