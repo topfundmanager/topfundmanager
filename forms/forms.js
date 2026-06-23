@@ -226,10 +226,35 @@ if (dashboardRoot) {
     );
   };
 
+  const getPreviewValue = (fields, keys) => {
+    const match = Object.entries(fields).find(([key, value]) => {
+      if (value === null || value === undefined || value === '') return false;
+      return keys.includes(key.toLowerCase());
+    });
+
+    if (!match) return '';
+    return formatValue(match[1]);
+  };
+
   const buildPreview = (data) => {
-    if (!data || typeof data !== 'object') return 'No data';
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return 'No data';
     const entries = Object.entries(data).filter(([key]) => key !== '_import');
     if (entries.length === 0) return 'No fields';
+
+    const fields = Object.fromEntries(entries);
+    const previewParts = [
+      ['Name', getPreviewValue(fields, ['name', 'full_name', 'fullname', 'contact_name', 'lead_name', 'first_name'])],
+      ['Email', getPreviewValue(fields, ['email', 'email_address', 'contact_email', 'lead_email'])],
+      ['Phone', getPreviewValue(fields, ['phone', 'phone_number', 'contact_phone', 'lead_phone', 'nominee_phone'])],
+      ['Note', getPreviewValue(fields, ['message', 'comments', 'description', 'details', 'summary', 'case_type', 'casetype', 'lead_urgency'])]
+    ]
+      .filter(([, value]) => value)
+      .map(([label, value]) => `${label}: ${value}`);
+
+    if (previewParts.length > 0) {
+      return previewParts.slice(0, 4).join(' | ');
+    }
+
     return entries
       .slice(0, 3)
       .map(([key, value]) => `${formatLabel(key)}: ${formatValue(value).slice(0, 40)}`)
@@ -477,7 +502,10 @@ if (dashboardRoot) {
       const preview = document.createElement('button');
       preview.className = 'forms-preview-button';
       preview.type = 'button';
-      preview.textContent = buildPreview(item.data);
+      const previewText = document.createElement('span');
+      previewText.className = 'forms-preview-button__text';
+      previewText.textContent = buildPreview(item.data);
+      preview.appendChild(previewText);
       preview.addEventListener('click', (event) => {
         event.stopPropagation();
         openSubmissionModal(item);
