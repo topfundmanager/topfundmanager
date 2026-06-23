@@ -449,18 +449,23 @@ if (dashboardRoot) {
       row.setAttribute('aria-label', `Open submission from ${item.site_id || 'unknown site'}`);
 
       const submittedCell = document.createElement('td');
+      submittedCell.dataset.label = 'Submitted';
       submittedCell.textContent = formatTimestamp(item.submitted_at);
 
       const siteCell = document.createElement('td');
+      siteCell.dataset.label = 'Site';
       siteCell.textContent = item.site_id;
 
       const formCell = document.createElement('td');
+      formCell.dataset.label = 'Form';
       formCell.textContent = item.form_id || '—';
 
       const originCell = document.createElement('td');
+      originCell.dataset.label = 'Origin';
       originCell.textContent = item.origin || '—';
 
       const previewCell = document.createElement('td');
+      previewCell.className = 'forms-table__preview';
       const preview = document.createElement('button');
       preview.className = 'forms-preview-button';
       preview.type = 'button';

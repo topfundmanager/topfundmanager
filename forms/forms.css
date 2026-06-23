@@ -830,13 +830,83 @@ form:not([hidden]) {
     padding: 1rem;
   }
 
-  .forms-table th,
+  /* Reflow the submissions table into stacked, labelled cards on phones */
+  .imported-forms-list {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .imported-forms-table-wrap {
+    overflow-x: visible;
+  }
+
+  .forms-table,
+  .forms-table tbody,
+  .forms-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .forms-table thead {
+    display: none;
+  }
+
+  .forms-table tr.forms-table__row {
+    display: grid;
+    gap: 0.55rem;
+    padding: 1rem;
+    margin-bottom: 0.85rem;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.62);
+  }
+
+  .forms-table tr.forms-table__row:last-child {
+    margin-bottom: 0;
+  }
+
   .forms-table td {
-    padding: 0.85rem 0.7rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    padding: 0;
+    border-bottom: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .forms-table td::before {
+    content: attr(data-label);
+    flex: 0 0 4.75rem;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .forms-table td.forms-table__preview {
+    display: block;
+    margin-top: 0.15rem;
+  }
+
+  .forms-table td.forms-table__preview::before {
+    display: none;
+  }
+
+  .forms-table td[colspan] {
+    justify-content: center;
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+
+  .forms-table td[colspan]::before {
+    display: none;
   }
 
   .forms-preview-button {
-    min-width: 18rem;
+    min-width: 0;
+    width: 100%;
   }
 
   .forms-modal {
