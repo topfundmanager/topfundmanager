@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <title>Forms Dashboard</title>
-    <link rel="stylesheet" href="/forms/forms.css?v=mobile-preview-20260623" />
+    <link rel="stylesheet" href="/forms/forms.css?v=seo-center-20260805" />
   </head>
   <body>
     <div class="forms-shell dashboard-shell" id="forms-dashboard">
@@ -19,8 +19,11 @@
         </div>
 
         <nav class="workspace-tabs" role="tablist" aria-label="Forms dashboard navigation">
-          <button class="workspace-tab workspace-tab--active" role="tab" aria-selected="true" type="button">
+          <button class="workspace-tab workspace-tab--active" id="submissions-tab" role="tab" aria-selected="true" aria-controls="submissions-panel" type="button">
             Submissions
+          </button>
+          <button class="workspace-tab" id="seo-tab" role="tab" aria-selected="false" aria-controls="seo-panel" type="button">
+            SEO Center
           </button>
           <button class="workspace-tab" id="refresh" type="button">Refresh</button>
           <button class="workspace-tab workspace-tab--danger" id="logout" type="button">Log out</button>
@@ -28,7 +31,7 @@
       </header>
 
       <main class="dashboard-content transition-panel">
-        <section class="section slide-up">
+        <section class="section slide-up" id="submissions-panel" role="tabpanel" aria-labelledby="submissions-tab">
           <article class="forms-card imported-forms-panel">
             <div class="imported-forms-panel__intro">
               <p class="panel-card__tag">Submissions</p>
@@ -66,9 +69,291 @@
             </div>
           </article>
         </section>
+
+        <section class="section seo-panel" id="seo-panel" role="tabpanel" aria-labelledby="seo-tab" hidden>
+          <article class="forms-card seo-center">
+            <div class="imported-forms-panel__intro seo-center__intro">
+              <div>
+                <p class="panel-card__tag">Search presence</p>
+                <h1>SEO Center</h1>
+                <p>Manage search metadata, entity context, structured data, and AI-discovery signals for every connected site.</p>
+              </div>
+              <div class="seo-health" aria-live="polite">
+                <span class="seo-health__score" id="seo-health-score">—</span>
+                <span>signal health</span>
+              </div>
+            </div>
+
+            <div class="seo-toolbar">
+              <div class="forms-field">
+                <label for="seo-site-select">Connected site</label>
+                <select id="seo-site-select" disabled>
+                  <option value="">Loading sites</option>
+                </select>
+              </div>
+              <div class="seo-toolbar__meta">
+                <span class="forms-chip" id="seo-record-status">Loading</span>
+                <a class="forms-button secondary" id="seo-open-site" href="#" target="_blank" rel="noopener">Open site</a>
+              </div>
+            </div>
+
+            <div id="seo-alert" class="forms-alert" hidden></div>
+
+            <div class="seo-workspace" id="seo-workspace" hidden>
+              <aside class="seo-preview-column" aria-label="SEO previews">
+                <section class="seo-preview-card">
+                  <span class="seo-preview-card__label">Search preview</span>
+                  <strong class="seo-search-preview__title" id="seo-preview-title"></strong>
+                  <span class="seo-search-preview__url" id="seo-preview-url"></span>
+                  <p id="seo-preview-description"></p>
+                </section>
+
+                <section class="seo-checklist-card">
+                  <div class="seo-section-heading">
+                    <h2>Signal checklist</h2>
+                    <span id="seo-checklist-count">0/0</span>
+                  </div>
+                  <ul class="seo-checklist" id="seo-checklist"></ul>
+                </section>
+
+                <section class="seo-preview-card">
+                  <span class="seo-preview-card__label">Delivery endpoints</span>
+                  <a id="seo-json-endpoint" href="#" target="_blank" rel="noopener">Managed SEO JSON</a>
+                  <a id="seo-llms-endpoint" href="#" target="_blank" rel="noopener">Generated llms.txt</a>
+                  <a id="seo-robots-endpoint" href="#" target="_blank" rel="noopener">Generated crawler policy</a>
+                  <p class="seo-help">Connected sites can consume these outputs during deployment. Saving here does not rewrite a satellite site until its deployment uses the managed profile.</p>
+                </section>
+              </aside>
+
+              <form class="seo-form" id="seo-form">
+                <section class="seo-form-section">
+                  <div class="seo-section-heading">
+                    <div>
+                      <p class="panel-card__tag">Foundation</p>
+                      <h2>Site and search metadata</h2>
+                    </div>
+                    <span>Homepage profile</span>
+                  </div>
+
+                  <div class="seo-form-grid seo-form-grid--two">
+                    <div class="forms-field">
+                      <label for="seo-site-url">Site URL</label>
+                      <input id="seo-site-url" name="site_url" type="url" required />
+                    </div>
+                    <div class="forms-field">
+                      <label for="seo-management-status">Management status</label>
+                      <select id="seo-management-status" name="management_status">
+                        <option value="draft">Draft</option>
+                        <option value="ready">Ready for site deployment</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="forms-field">
+                    <div class="seo-label-row">
+                      <label for="seo-title">SEO title</label>
+                      <span data-count-for="seo-title">0 / 60</span>
+                    </div>
+                    <input id="seo-title" name="seo_title" type="text" maxlength="160" required />
+                  </div>
+
+                  <div class="forms-field">
+                    <div class="seo-label-row">
+                      <label for="seo-description">Meta description</label>
+                      <span data-count-for="seo-description">0 / 160</span>
+                    </div>
+                    <textarea id="seo-description" name="meta_description" rows="3" maxlength="500" required></textarea>
+                  </div>
+
+                  <div class="seo-form-grid seo-form-grid--two">
+                    <div class="forms-field">
+                      <label for="seo-canonical">Canonical URL</label>
+                      <input id="seo-canonical" name="canonical_url" type="url" required />
+                    </div>
+                    <div class="forms-field">
+                      <label for="seo-language">Language code</label>
+                      <input id="seo-language" name="language_code" type="text" placeholder="en" required />
+                    </div>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-robots">Robots meta directive</label>
+                    <input id="seo-robots" name="robots_directive" type="text" placeholder="index, follow, max-image-preview:large" />
+                  </div>
+                </section>
+
+                <section class="seo-form-section">
+                  <div class="seo-section-heading">
+                    <div>
+                      <p class="panel-card__tag">Sharing</p>
+                      <h2>Social metadata</h2>
+                    </div>
+                    <span>Open Graph and X</span>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-og-title">Open Graph title</label>
+                    <input id="seo-og-title" name="og_title" type="text" maxlength="200" />
+                  </div>
+                  <div class="forms-field">
+                    <label for="seo-og-description">Open Graph description</label>
+                    <textarea id="seo-og-description" name="og_description" rows="3" maxlength="500"></textarea>
+                  </div>
+                  <div class="forms-field">
+                    <label for="seo-og-image">Open Graph image URL</label>
+                    <input id="seo-og-image" name="og_image_url" type="url" />
+                  </div>
+
+                  <details class="forms-modal-disclosure seo-disclosure">
+                    <summary><strong>X / Twitter overrides</strong><span>Optional</span></summary>
+                    <div class="forms-modal-disclosure__body seo-disclosure__body">
+                      <div class="forms-field">
+                        <label for="seo-twitter-card">Card type</label>
+                        <select id="seo-twitter-card" name="twitter_card">
+                          <option value="summary_large_image">Large image</option>
+                          <option value="summary">Summary</option>
+                        </select>
+                      </div>
+                      <div class="forms-field">
+                        <label for="seo-twitter-title">Title</label>
+                        <input id="seo-twitter-title" name="twitter_title" type="text" maxlength="200" />
+                      </div>
+                      <div class="forms-field">
+                        <label for="seo-twitter-description">Description</label>
+                        <textarea id="seo-twitter-description" name="twitter_description" rows="3" maxlength="500"></textarea>
+                      </div>
+                      <div class="forms-field">
+                        <label for="seo-twitter-image">Image URL</label>
+                        <input id="seo-twitter-image" name="twitter_image_url" type="url" />
+                      </div>
+                    </div>
+                  </details>
+                </section>
+
+                <section class="seo-form-section">
+                  <div class="seo-section-heading">
+                    <div>
+                      <p class="panel-card__tag">Entity clarity</p>
+                      <h2>Business context</h2>
+                    </div>
+                    <span>Search engines and answer engines</span>
+                  </div>
+
+                  <div class="seo-form-grid seo-form-grid--two">
+                    <div class="forms-field">
+                      <label for="seo-entity-name">Entity name</label>
+                      <input id="seo-entity-name" name="entity_name" type="text" required />
+                    </div>
+                    <div class="forms-field">
+                      <label for="seo-entity-type">Schema entity type</label>
+                      <input id="seo-entity-type" name="entity_type" type="text" placeholder="Organization" required />
+                    </div>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-entity-description">Factual entity description</label>
+                    <textarea id="seo-entity-description" name="entity_description" rows="4" maxlength="1200" required></textarea>
+                    <p class="seo-help">Use concrete, supportable facts. Avoid awards, rankings, guarantees, and superlatives that the published site cannot verify.</p>
+                  </div>
+
+                  <div class="seo-form-grid seo-form-grid--two">
+                    <div class="forms-field">
+                      <label for="seo-audience">Primary audiences</label>
+                      <textarea id="seo-audience" name="audience" rows="5" data-list-field></textarea>
+                      <p class="seo-help">One item per line.</p>
+                    </div>
+                    <div class="forms-field">
+                      <label for="seo-services">Services</label>
+                      <textarea id="seo-services" name="services" rows="5" data-list-field></textarea>
+                      <p class="seo-help">One item per line.</p>
+                    </div>
+                    <div class="forms-field">
+                      <label for="seo-service-areas">Service areas</label>
+                      <textarea id="seo-service-areas" name="service_areas" rows="5" data-list-field></textarea>
+                      <p class="seo-help">One location per line.</p>
+                    </div>
+                    <div class="forms-field">
+                      <label for="seo-search-topics">Search topics</label>
+                      <textarea id="seo-search-topics" name="search_topics" rows="5" data-list-field></textarea>
+                      <p class="seo-help">Descriptive topics, not a keyword-stuffed paragraph.</p>
+                    </div>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-same-as">Official profile URLs</label>
+                    <textarea id="seo-same-as" name="same_as" rows="4" data-list-field></textarea>
+                    <p class="seo-help">One verified social, directory, or authoritative entity URL per line.</p>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-faqs">Frequently asked questions (JSON)</label>
+                    <textarea class="seo-code-field" id="seo-faqs" name="faqs" rows="9" spellcheck="false"></textarea>
+                    <p class="seo-help">JSON list of objects with <code>question</code> and <code>answer</code>. Answers must match public site claims.</p>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-structured-data">Structured data (JSON-LD)</label>
+                    <textarea class="seo-code-field" id="seo-structured-data" name="structured_data" rows="14" spellcheck="false"></textarea>
+                  </div>
+                </section>
+
+                <section class="seo-form-section">
+                  <div class="seo-section-heading">
+                    <div>
+                      <p class="panel-card__tag">AI discovery</p>
+                      <h2>Answer-engine context</h2>
+                    </div>
+                    <span>Machine-readable factual signals</span>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-llms-summary">LLM summary</label>
+                    <textarea id="seo-llms-summary" name="llms_summary" rows="5" maxlength="4000" required></textarea>
+                    <p class="seo-help">A plain-language description of what the organization is, who it serves, and what it offers.</p>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-llms-facts">Key facts</label>
+                    <textarea id="seo-llms-facts" name="llms_key_facts" rows="7" data-list-field></textarea>
+                    <p class="seo-help">One verifiable fact per line.</p>
+                  </div>
+
+                  <div class="forms-field">
+                    <label for="seo-ai-crawlers">AI crawler policy (JSON)</label>
+                    <textarea class="seo-code-field" id="seo-ai-crawlers" name="ai_crawler_policy" rows="10" spellcheck="false"></textarea>
+                    <p class="seo-help">Use <code>allow</code> or <code>disallow</code> per crawler. This generates a deployable policy; each site must publish it in its own robots.txt.</p>
+                  </div>
+                </section>
+
+                <section class="seo-form-section seo-source-section">
+                  <div class="seo-section-heading">
+                    <div>
+                      <p class="panel-card__tag">Baseline</p>
+                      <h2>Published source snapshot</h2>
+                    </div>
+                    <span id="seo-source-checked">Not checked</span>
+                  </div>
+                  <p class="seo-help">Read-only metadata captured from the live homepage before the managed recommendations were created.</p>
+                  <pre class="forms-modal-raw" id="seo-source-snapshot"></pre>
+                </section>
+
+                <div class="seo-save-bar">
+                  <div>
+                    <strong id="seo-save-state">No unsaved changes</strong>
+                    <span id="seo-revision"></span>
+                  </div>
+                  <div class="forms-actions">
+                    <button class="forms-button secondary" id="seo-reset" type="button">Reset changes</button>
+                    <button class="forms-button primary" id="seo-save" type="submit">Save SEO profile</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </article>
+        </section>
       </main>
     </div>
 
-    <script src="/forms/forms.js?v=mobile-preview-20260623"></script>
+    <script src="/forms/forms.js?v=seo-center-20260805"></script>
   </body>
 </html>

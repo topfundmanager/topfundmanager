@@ -87,6 +87,21 @@ Top Fund Manager is the primary forms destination. External sites can submit dir
 - Browser/client form endpoint: `POST https://topfundmanager.com/api/forms/submit` with `X-Forms-Site-Key`
 - Server-to-server import endpoint: `POST https://topfundmanager.com/api/forms/import` with `X-Forms-Import-Key`
 
+### Central SEO profiles
+
+The authenticated forms dashboard includes an **SEO Center** for the connected sites. Apply
+`supabase/migrations/202608050001_site_seo_management.sql` before using it. Profiles are private
+while being edited, and profiles marked **Ready for site deployment** are exposed through these
+read-only delivery endpoints:
+
+- Managed metadata and entity JSON: `GET /api/seo/:siteId`
+- Generated LLM context: `GET /api/seo/:siteId/llms.txt`
+- Generated crawler policy: `GET /api/seo/:siteId/robots.txt`
+
+Satellite sites must consume the JSON during their build/deployment and publish the generated
+metadata, JSON-LD, `llms.txt`, and crawler rules on their own domains. Saving a profile in the
+dashboard does not rewrite an external site's HTML by itself.
+
 **Important:** For `FROM_EMAIL`, you need to either:
 - Verify your domain in Resend (recommended), or
 - Use `onboarding@resend.dev` for testing
