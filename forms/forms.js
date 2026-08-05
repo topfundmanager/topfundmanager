@@ -112,7 +112,7 @@ if (verifyForm) {
         }),
       });
 
-      window.location.href = '/forms/dashboard.html';
+      window.location.href = '/dashboard';
     } catch (error) {
       setAlert(alertBox, error.message || 'Verification failed.');
     } finally {
@@ -848,7 +848,7 @@ if (dashboardRoot) {
       await loadSites();
       await loadSubmissions();
     } catch (error) {
-      window.location.href = '/forms/index.html';
+      window.location.href = '/forms/';
     }
   };
 
@@ -934,7 +934,7 @@ if (dashboardRoot) {
     } catch (error) {
       setAlert(dashboardAlert, error.message || 'Unable to log out.');
     } finally {
-      window.location.href = '/forms/index.html';
+      window.location.href = '/forms/';
     }
   });
 
