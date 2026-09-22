@@ -387,17 +387,18 @@ if (dashboardRoot) {
     seoSaveState.textContent = seoIsDirty ? 'Unsaved changes' : 'No unsaved changes';
   };
 
-  const setSeoEndpointLinks = (siteId) => {
+  const setSeoEndpointLinks = (siteId, revision) => {
     const encoded = encodeURIComponent(siteId);
-    const jsonUrl = `/api/seo/${encoded}`;
-    const llmsUrl = `/api/seo/${encoded}/llms.txt`;
-    const robotsUrl = `/api/seo/${encoded}/robots.txt`;
-    seoJsonEndpoint.href = jsonUrl;
-    seoJsonEndpoint.textContent = jsonUrl;
-    seoLlmsEndpoint.href = llmsUrl;
-    seoLlmsEndpoint.textContent = llmsUrl;
-    seoRobotsEndpoint.href = robotsUrl;
-    seoRobotsEndpoint.textContent = robotsUrl;
+    const revisionQuery = revision ? `?revision=${encodeURIComponent(revision)}` : '';
+    const jsonPath = `/api/seo/${encoded}`;
+    const llmsPath = `/api/seo/${encoded}/llms.txt`;
+    const robotsPath = `/api/seo/${encoded}/robots.txt`;
+    seoJsonEndpoint.href = `${jsonPath}${revisionQuery}`;
+    seoJsonEndpoint.textContent = jsonPath;
+    seoLlmsEndpoint.href = `${llmsPath}${revisionQuery}`;
+    seoLlmsEndpoint.textContent = llmsPath;
+    seoRobotsEndpoint.href = `${robotsPath}${revisionQuery}`;
+    seoRobotsEndpoint.textContent = robotsPath;
   };
 
   const renderSeoProfile = (profile) => {
@@ -418,7 +419,7 @@ if (dashboardRoot) {
     seoSourceSnapshot.textContent = formatJson(profile.source_snapshot, {});
     seoSourceChecked.textContent = formatCheckedAt(profile.source_checked_at);
     seoRevision.textContent = `Revision ${profile.revision || 1}${profile.updated_by ? ` · Updated by ${profile.updated_by}` : ''}`;
-    setSeoEndpointLinks(profile.site_id);
+    setSeoEndpointLinks(profile.site_id, profile.revision);
     seoWorkspace.hidden = false;
 
     seoOriginalSignature = getSeoFormSignature();
@@ -917,7 +918,12 @@ if (dashboardRoot) {
       const saved = { ...current, ...(data.profile || {}), site_name: current.site_name };
       seoProfiles = seoProfiles.map((item) => item.site_id === activeSeoSiteId ? saved : item);
       renderSeoProfile(saved);
-      setAlert(seoAlert, 'SEO profile saved. The delivery endpoints now expose this revision when its status is ready.', 'success');
+      const publication = data.publication || {};
+      const revisionLabel = publication.revision || saved.revision || 1;
+      const message = publication.published
+        ? `SEO profile saved. Revision ${revisionLabel} is now live on all managed endpoints.`
+        : `SEO profile saved as draft at revision ${revisionLabel}. Mark it ready to publish it to the managed endpoints.`;
+      setAlert(seoAlert, message, 'success');
     } catch (error) {
       setAlert(seoAlert, error.message || 'Unable to save SEO profile.');
       seoSaveState.textContent = 'Save failed — changes are still in this form';

@@ -2,7 +2,9 @@ import { errorResponse, jsonResponse, supabaseFetchJson } from '../forms/utils.j
 
 const PUBLIC_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+  'Cache-Control': 'no-store, no-cache, must-revalidate',
+  'CDN-Cache-Control': 'no-store',
+  'Cloudflare-CDN-Cache-Control': 'no-store',
 };
 
 export async function onRequestGet({ env, params }) {
@@ -63,7 +65,10 @@ export async function onRequestGet({ env, params }) {
         keyFacts: profile.llms_key_facts,
         crawlerPolicy: profile.ai_crawler_policy,
       },
-    }, 200, PUBLIC_HEADERS);
+    }, 200, {
+      ...PUBLIC_HEADERS,
+      'X-SEO-Revision': String(profile.revision || 1),
+    });
   } catch (error) {
     return errorResponse(500, error.message || 'Unable to load SEO profile.', PUBLIC_HEADERS);
   }

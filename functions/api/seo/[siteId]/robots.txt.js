@@ -3,7 +3,9 @@ import { supabaseFetchJson } from '../../forms/utils.js';
 const TEXT_HEADERS = {
   'Content-Type': 'text/plain; charset=utf-8',
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+  'Cache-Control': 'no-store, no-cache, must-revalidate',
+  'CDN-Cache-Control': 'no-store',
+  'Cloudflare-CDN-Cache-Control': 'no-store',
 };
 
 export async function onRequestGet({ env, params }) {
@@ -15,7 +17,7 @@ export async function onRequestGet({ env, params }) {
 
     const profiles = await supabaseFetchJson(
       env,
-      `/rest/v1/site_seo_profiles?select=site_url,ai_crawler_policy&site_id=eq.${encodeURIComponent(siteId)}&management_status=eq.ready&limit=1`
+      `/rest/v1/site_seo_profiles?select=site_url,ai_crawler_policy,revision&site_id=eq.${encodeURIComponent(siteId)}&management_status=eq.ready&limit=1`
     );
     if (!profiles?.length) {
       return new Response('SEO profile not found.\n', { status: 404, headers: TEXT_HEADERS });
@@ -33,7 +35,13 @@ export async function onRequestGet({ env, params }) {
     const siteUrl = String(profile.site_url || '').replace(/\/$/, '');
     if (siteUrl) blocks.push('', `Sitemap: ${siteUrl}/sitemap.xml`);
 
-    return new Response(`${blocks.join('\n')}\n`, { status: 200, headers: TEXT_HEADERS });
+    return new Response(`${blocks.join('\n')}\n`, {
+      status: 200,
+      headers: {
+        ...TEXT_HEADERS,
+        'X-SEO-Revision': String(profile.revision || 1),
+      },
+    });
   } catch {
     return new Response('Unable to load SEO profile.\n', { status: 500, headers: TEXT_HEADERS });
   }

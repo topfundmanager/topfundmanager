@@ -253,7 +253,25 @@ export async function onRequestPut({ request, env }) {
       }
     );
 
-    return jsonResponse({ success: true, profile: saved?.[0] || payload });
+    const savedProfile = saved?.[0] || payload;
+    const encodedSiteId = encodeURIComponent(siteId);
+    const isPublished = savedProfile.management_status === 'ready';
+
+    return jsonResponse({
+      success: true,
+      profile: savedProfile,
+      publication: {
+        published: isPublished,
+        status: isPublished ? 'published' : 'draft',
+        revision: savedProfile.revision,
+        updatedAt: savedProfile.updated_at,
+        endpoints: {
+          json: `/api/seo/${encodedSiteId}`,
+          llms: `/api/seo/${encodedSiteId}/llms.txt`,
+          robots: `/api/seo/${encodedSiteId}/robots.txt`,
+        },
+      },
+    }, 200, { 'Cache-Control': 'no-store' });
   } catch (error) {
     const message = error.message || 'Unable to save SEO profile.';
     const status = message.startsWith('Supabase error:') ? 500 : 400;

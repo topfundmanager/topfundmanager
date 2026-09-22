@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Top Fund Manager - Real Estate Investing",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "wrangler pages dev . --live-reload",
     "deploy": "wrangler pages deploy .",
-    "preview": "wrangler pages dev ."
+    "preview": "wrangler pages dev .",
+    "test:seo": "node --test tests/seo-publishing.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^3.0.0"

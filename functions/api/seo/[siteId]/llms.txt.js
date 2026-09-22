@@ -3,7 +3,9 @@ import { supabaseFetchJson } from '../../forms/utils.js';
 const TEXT_HEADERS = {
   'Content-Type': 'text/plain; charset=utf-8',
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+  'Cache-Control': 'no-store, no-cache, must-revalidate',
+  'CDN-Cache-Control': 'no-store',
+  'Cloudflare-CDN-Cache-Control': 'no-store',
 };
 
 const safeText = (value) => String(value || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim();
@@ -48,7 +50,13 @@ export async function onRequestGet({ env, params }) {
       faqSection,
     ].filter(Boolean).join('\n');
 
-    return new Response(`${content.trim()}\n`, { status: 200, headers: TEXT_HEADERS });
+    return new Response(`${content.trim()}\n`, {
+      status: 200,
+      headers: {
+        ...TEXT_HEADERS,
+        'X-SEO-Revision': String(profile.revision || 1),
+      },
+    });
   } catch (error) {
     return new Response('Unable to load SEO profile.\n', { status: 500, headers: TEXT_HEADERS });
   }
