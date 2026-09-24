@@ -181,9 +181,12 @@ if (dashboardRoot) {
   const seoSourceChecked = document.getElementById('seo-source-checked');
   const seoSaveState = document.getElementById('seo-save-state');
   const seoRevision = document.getElementById('seo-revision');
+  const seoPublicationState = document.getElementById('seo-publication-state');
   const seoSaveBar = document.querySelector('.seo-save-bar');
   const seoSaveButton = document.getElementById('seo-save');
   const seoResetButton = document.getElementById('seo-reset');
+  const seoPublishButton = document.getElementById('seo-publish');
+  const seoVerifyButton = document.getElementById('seo-verify');
   let activeModal = null;
   let seoProfiles = [];
   let activeSeoSiteId = '';
@@ -385,6 +388,23 @@ if (dashboardRoot) {
     seoIsDirty = Boolean(seoOriginalSignature && getSeoFormSignature() !== seoOriginalSignature);
     seoSaveBar?.classList.toggle('is-dirty', seoIsDirty);
     seoSaveState.textContent = seoIsDirty ? 'Unsaved changes' : 'No unsaved changes';
+    const profile = seoProfiles.find((item) => item.site_id === activeSeoSiteId);
+    seoPublishButton.disabled = seoIsDirty || !profile || profile.management_status !== 'ready';
+    seoVerifyButton.disabled = seoIsDirty || !profile?.published_revision;
+  };
+
+  const renderSeoPublication = (profile) => {
+    const publishedRevision = Number(profile.published_revision || 0);
+    const verified = publishedRevision && Number(profile.live_verified_revision) === publishedRevision &&
+      Boolean(profile.live_verified_at);
+    seoPublicationState.classList.toggle('is-live', Boolean(verified));
+    seoPublicationState.classList.toggle('is-warning', Boolean(publishedRevision && !verified));
+    seoPublicationState.textContent = !publishedRevision
+      ? 'Not published to site'
+      : verified
+        ? `Revision ${publishedRevision} verified on the live site`
+        : `Revision ${publishedRevision} published centrally; live site not verified${profile.live_verification_error ? ` — ${profile.live_verification_error}` : ''}`;
+    seoVerifyButton.disabled = !publishedRevision;
   };
 
   const setSeoEndpointLinks = (siteId, revision) => {
@@ -419,6 +439,7 @@ if (dashboardRoot) {
     seoSourceSnapshot.textContent = formatJson(profile.source_snapshot, {});
     seoSourceChecked.textContent = formatCheckedAt(profile.source_checked_at);
     seoRevision.textContent = `Revision ${profile.revision || 1}${profile.updated_by ? ` · Updated by ${profile.updated_by}` : ''}`;
+    renderSeoPublication(profile);
     setSeoEndpointLinks(profile.site_id, profile.revision);
     seoWorkspace.hidden = false;
 
@@ -427,6 +448,7 @@ if (dashboardRoot) {
     seoSaveBar?.classList.remove('is-dirty');
     seoSaveState.textContent = 'No unsaved changes';
     updateSeoPreview();
+    updateSeoDirtyState();
   };
 
   const loadSeoProfiles = async ({ preserveSelection = true } = {}) => {
@@ -922,12 +944,9 @@ if (dashboardRoot) {
       const saved = { ...current, ...(data.profile || {}), site_name: current.site_name };
       seoProfiles = seoProfiles.map((item) => item.site_id === activeSeoSiteId ? saved : item);
       renderSeoProfile(saved);
-      const publication = data.publication || {};
-      const revisionLabel = publication.revision || saved.revision || 1;
-      const message = publication.published
-        ? `SEO profile saved. Revision ${revisionLabel} is now live on all managed endpoints.`
-        : `SEO profile saved as draft at revision ${revisionLabel}. Mark it ready to publish it to the managed endpoints.`;
-      setAlert(seoAlert, message, 'success');
+      setAlert(seoAlert,
+        `Revision ${saved.revision || 1} saved to the dashboard. Use Publish to site when the recommendations are ready to go live.`,
+        'success');
     } catch (error) {
       setAlert(seoAlert, error.message || 'Unable to save SEO profile.');
       seoSaveState.textContent = 'Save failed — changes are still in this form';
@@ -935,6 +954,73 @@ if (dashboardRoot) {
     } finally {
       seoSaveButton.disabled = false;
       seoResetButton.disabled = false;
+    }
+  });
+
+  const applyPublication = (publication) => {
+    const current = seoProfiles.find((item) => item.site_id === publication.siteId);
+    if (!current) return;
+    const updated = {
+      ...current,
+      published_revision: publication.revision,
+      published_at: publication.publishedAt,
+      published_by: publication.publishedBy,
+      live_verified_revision: publication.liveVerified ? publication.revision : null,
+      live_verified_at: publication.liveVerifiedAt,
+      live_verification_error: publication.liveError,
+    };
+    seoProfiles = seoProfiles.map((item) => item.site_id === publication.siteId ? updated : item);
+    renderSeoProfile(updated);
+  };
+
+  seoPublishButton.addEventListener('click', async () => {
+    const profile = seoProfiles.find((item) => item.site_id === activeSeoSiteId);
+    if (!profile || seoIsDirty || profile.management_status !== 'ready') {
+      setAlert(seoAlert, 'Save this profile as Ready for site deployment before publishing.');
+      return;
+    }
+    if (!window.confirm(`Publish revision ${profile.revision} to ${getSiteDisplayName(profile.site_id, profile.site_name)}? This changes the live site's homepage SEO metadata and crawler files.`)) {
+      return;
+    }
+    seoPublishButton.disabled = true;
+    clearAlert(seoAlert);
+    seoPublicationState.textContent = 'Publishing…';
+    try {
+      const data = await apiRequest('/api/forms/seo/publish', {
+        method: 'POST',
+        body: JSON.stringify({ siteId: profile.site_id, revision: profile.revision }),
+      });
+      applyPublication(data.publication);
+      setAlert(seoAlert, data.publication.liveVerified
+        ? `Revision ${data.publication.revision} is published and verified on the live site.`
+        : `Revision ${data.publication.revision} is published centrally, but the live site could not be verified. Check the connector and try Check live site.`, 'success');
+    } catch (error) {
+      renderSeoPublication(profile);
+      setAlert(seoAlert, error.message || 'Unable to publish SEO.');
+    } finally {
+      updateSeoDirtyState();
+    }
+  });
+
+  seoVerifyButton.addEventListener('click', async () => {
+    const profile = seoProfiles.find((item) => item.site_id === activeSeoSiteId);
+    if (!profile?.published_revision || seoIsDirty) return;
+    seoVerifyButton.disabled = true;
+    clearAlert(seoAlert);
+    try {
+      const data = await apiRequest('/api/forms/seo/publish', {
+        method: 'POST',
+        body: JSON.stringify({ siteId: profile.site_id, action: 'verify' }),
+      });
+      applyPublication(data.publication);
+      setAlert(seoAlert, data.publication.liveVerified
+        ? `Revision ${data.publication.revision} is visible on the live site.`
+        : data.publication.liveError || 'The live site has not applied this revision yet.',
+      data.publication.liveVerified ? 'success' : 'error');
+    } catch (error) {
+      setAlert(seoAlert, error.message || 'Unable to check the live site.');
+    } finally {
+      seoVerifyButton.disabled = false;
     }
   });
 

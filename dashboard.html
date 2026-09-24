@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <title>Top Fund Manager Dashboard</title>
-    <link rel="stylesheet" href="/forms/forms.css?v=seo-reload-20260924" />
+    <link rel="stylesheet" href="/forms/forms.css?v=seo-publish-20260924" />
   </head>
   <body>
     <div class="forms-shell dashboard-shell" id="forms-dashboard">
@@ -124,7 +124,7 @@
                   <a id="seo-json-endpoint" href="#" target="_blank" rel="noopener">Managed SEO JSON</a>
                   <a id="seo-llms-endpoint" href="#" target="_blank" rel="noopener">Generated llms.txt</a>
                   <a id="seo-robots-endpoint" href="#" target="_blank" rel="noopener">Generated crawler policy</a>
-                  <p class="seo-help">Connected sites can consume these outputs during deployment. Saving here does not rewrite a satellite site until its deployment uses the managed profile.</p>
+                  <p class="seo-help">These are the latest saved recommendations. Use Publish to site to make a saved revision available to the connected website.</p>
                 </section>
               </aside>
 
@@ -344,10 +344,13 @@
                   <div>
                     <strong id="seo-save-state">No unsaved changes</strong>
                     <span id="seo-revision"></span>
+                    <span id="seo-publication-state" aria-live="polite">Not published to site</span>
                   </div>
                   <div class="forms-actions">
                     <button class="forms-button secondary" id="seo-reset" type="button">Reset changes</button>
-                    <button class="forms-button primary" id="seo-save" type="submit">Save SEO profile</button>
+                    <button class="forms-button secondary" id="seo-save" type="submit">Save SEO profile</button>
+                    <button class="forms-button secondary" id="seo-verify" type="button" disabled>Check live site</button>
+                    <button class="forms-button primary" id="seo-publish" type="button" disabled>Publish to site</button>
                   </div>
                 </div>
               </form>
@@ -357,6 +360,6 @@
       </main>
     </div>
 
-    <script src="/forms/forms.js?v=seo-reload-20260924"></script>
+    <script src="/forms/forms.js?v=seo-publish-20260924"></script>
   </body>
 </html>

@@ -1067,6 +1067,14 @@ form:not([hidden]) {
   font-size: 0.78rem;
 }
 
+#seo-publication-state.is-live {
+  color: var(--success);
+}
+
+#seo-publication-state.is-warning {
+  color: var(--danger);
+}
+
 .seo-save-bar.is-dirty strong {
   color: var(--accent);
 }

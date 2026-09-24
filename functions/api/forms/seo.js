@@ -200,7 +200,7 @@ export async function onRequestGet({ request, env }) {
 
     return jsonResponse({
       success: true,
-      profiles: (profiles || []).map((profile) => ({
+      profiles: (profiles || []).map(({ published_snapshot: _snapshot, ...profile }) => ({
         ...profile,
         site_name: siteNames.get(profile.site_id) || profile.site_id,
       })),
@@ -253,18 +253,16 @@ export async function onRequestPut({ request, env }) {
       }
     );
 
-    const savedProfile = saved?.[0] || payload;
+    const { published_snapshot: _snapshot, ...savedProfile } = saved?.[0] || payload;
     const encodedSiteId = encodeURIComponent(siteId);
-    const isPublished = savedProfile.management_status === 'ready';
-
     return jsonResponse({
       success: true,
       profile: savedProfile,
       publication: {
-        published: isPublished,
-        status: isPublished ? 'published' : 'draft',
-        revision: savedProfile.revision,
-        updatedAt: savedProfile.updated_at,
+        published: Number(savedProfile.published_revision || 0) === Number(savedProfile.revision),
+        status: savedProfile.published_revision ? 'previous_revision_published' : 'not_published',
+        revision: savedProfile.published_revision || null,
+        savedRevision: savedProfile.revision,
         endpoints: {
           json: `/api/seo/${encodedSiteId}`,
           llms: `/api/seo/${encodedSiteId}/llms.txt`,

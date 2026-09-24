@@ -49,7 +49,7 @@ const readyProfile = {
   updated_at: '2026-09-22T18:00:00.000Z',
 };
 
-test('saving a ready profile upserts Supabase and returns immediate publication details', async () => {
+test('saving a ready profile updates managed endpoints without publishing the site', async () => {
   const originalFetch = globalThis.fetch;
   const writes = [];
 
@@ -93,10 +93,10 @@ test('saving a ready profile upserts Supabase and returns immediate publication 
     assert.equal(writes[0].revision, 8);
     assert.equal(writes[0].updated_by, 'admin@example.com');
     assert.deepEqual(body.publication, {
-      published: true,
-      status: 'published',
-      revision: 8,
-      updatedAt: writes[0].updated_at,
+      published: false,
+      status: 'not_published',
+      revision: null,
+      savedRevision: 8,
       endpoints: {
         json: '/api/seo/jccaring',
         llms: '/api/seo/jccaring/llms.txt',
