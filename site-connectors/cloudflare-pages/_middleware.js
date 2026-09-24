@@ -18,6 +18,21 @@ const fetchPublished = (url) => fetch(url, {
   signal: AbortSignal.timeout(5000),
 });
 
+const unpublishedFallback = (path, context) => {
+  if (path === '/robots.txt') {
+    return new Response('User-agent: *\nAllow: /\n', {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+  if (path === '/llms.txt') {
+    return new Response('No SEO profile has been published for this site.\n', {
+      status: 404,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+    });
+  }
+  return context.next();
+};
+
 export async function onRequest(context) {
   if (context.request.method !== 'GET') return context.next();
   const url = new URL(context.request.url);
@@ -32,9 +47,9 @@ export async function onRequest(context) {
       url.pathname === '/' || url.pathname === '/index.html' ? '' : url.pathname));
   } catch (error) {
     console.error(`SEO connector for ${siteId} could not load the published profile:`, error);
-    return context.next();
+    return unpublishedFallback(url.pathname, context);
   }
-  if (!source.ok) return context.next();
+  if (!source.ok) return unpublishedFallback(url.pathname, context);
 
   if (url.pathname === '/robots.txt' || url.pathname === '/llms.txt') {
     return new Response(source.body, {
@@ -43,9 +58,9 @@ export async function onRequest(context) {
   }
 
   let profile;
-  try { profile = await source.json(); } catch { return context.next(); }
+  try { profile = await source.json(); } catch { return unpublishedFallback(url.pathname, context); }
   if (profile.siteId !== siteId || !profile.revision || !profile.seo?.canonical) {
-    return context.next();
+    return unpublishedFallback(url.pathname, context);
   }
   const response = await context.next();
   if (!response.ok || !(response.headers.get('content-type') || '').includes('text/html')) {
