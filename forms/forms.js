@@ -423,6 +423,7 @@ if (dashboardRoot) {
 
   const renderSeoProfile = (profile) => {
     if (!profile) return;
+    clearAlert(seoAlert);
     activeSeoSiteId = profile.site_id;
     seoSiteSelect.value = profile.site_id;
 

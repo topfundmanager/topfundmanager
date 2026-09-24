@@ -1380,3 +1380,40 @@ form:not([hidden]) {
     padding: 1.2rem;
   }
 }
+
+@media (max-width: 420px) {
+  .seo-save-bar__actions .forms-button {
+    padding: 0.55rem 0.35rem;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: normal;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .workspace-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    border-radius: 20px;
+  }
+
+  .workspace-tab {
+    min-width: 0;
+    padding-inline: 0.35rem;
+  }
+
+  .workspace-tab--danger {
+    grid-column: 1 / -1;
+  }
+
+  .forms-table td {
+    display: block;
+  }
+
+  .forms-table td::before {
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+}
