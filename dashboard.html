@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <title>Top Fund Manager Dashboard</title>
-    <link rel="stylesheet" href="/forms/forms.css?v=immediate-seo-save-20260922" />
+    <link rel="stylesheet" href="/forms/forms.css?v=seo-reload-20260924" />
   </head>
   <body>
     <div class="forms-shell dashboard-shell" id="forms-dashboard">
@@ -25,7 +25,6 @@
           <button class="workspace-tab" id="seo-tab" role="tab" aria-selected="false" aria-controls="seo-panel" type="button">
             SEO Center
           </button>
-          <button class="workspace-tab" id="refresh" type="button">Refresh</button>
           <button class="workspace-tab workspace-tab--danger" id="logout" type="button">Log out</button>
         </nav>
       </header>
@@ -46,7 +45,10 @@
                   <option value="">All sites</option>
                 </select>
               </div>
-              <div class="forms-chip imported-forms-count" id="submission-count">Loading</div>
+              <div class="forms-toolbar__actions">
+                <div class="forms-chip imported-forms-count" id="submission-count">Loading</div>
+                <button class="forms-button secondary" id="refresh-submissions" type="button">Refresh submissions</button>
+              </div>
             </div>
 
             <div id="dashboard-alert" class="forms-alert" hidden></div>
@@ -94,6 +96,7 @@
               <div class="seo-toolbar__meta">
                 <span class="forms-chip" id="seo-record-status">Loading</span>
                 <a class="forms-button secondary" id="seo-open-site" href="#" target="_blank" rel="noopener">Open site</a>
+                <button class="forms-button secondary" id="reload-seo" type="button" aria-label="Reload SEO profiles from the server">Reload SEO</button>
               </div>
             </div>
 
@@ -354,6 +357,6 @@
       </main>
     </div>
 
-    <script src="/forms/forms.js?v=immediate-seo-save-20260922"></script>
+    <script src="/forms/forms.js?v=seo-reload-20260924"></script>
   </body>
 </html>

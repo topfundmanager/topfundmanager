@@ -159,7 +159,8 @@ if (dashboardRoot) {
   const siteFilter = document.getElementById('site-filter');
   const submissionCount = document.getElementById('submission-count');
   const dashboardAlert = document.getElementById('dashboard-alert');
-  const refreshButton = document.getElementById('refresh');
+  const refreshSubmissionsButton = document.getElementById('refresh-submissions');
+  const reloadSeoButton = document.getElementById('reload-seo');
   const logoutButton = document.getElementById('logout');
   const seoSiteSelect = document.getElementById('seo-site-select');
   const seoWorkspace = document.getElementById('seo-workspace');
@@ -184,7 +185,6 @@ if (dashboardRoot) {
   const seoSaveButton = document.getElementById('seo-save');
   const seoResetButton = document.getElementById('seo-reset');
   let activeModal = null;
-  let activeDashboardView = 'submissions';
   let seoProfiles = [];
   let activeSeoSiteId = '';
   let seoOriginalSignature = '';
@@ -461,7 +461,6 @@ if (dashboardRoot) {
   };
 
   const setDashboardView = async (view) => {
-    activeDashboardView = view;
     const showingSeo = view === 'seo';
     submissionsPanel.hidden = showingSeo;
     seoPanel.hidden = !showingSeo;
@@ -469,8 +468,6 @@ if (dashboardRoot) {
     submissionsTab.setAttribute('aria-selected', String(!showingSeo));
     seoTab.classList.toggle('workspace-tab--active', showingSeo);
     seoTab.setAttribute('aria-selected', String(showingSeo));
-    refreshButton.textContent = showingSeo ? 'Reload SEO' : 'Refresh';
-
     if (showingSeo && !seoProfiles.length) {
       try {
         await loadSeoProfiles();
@@ -857,15 +854,22 @@ if (dashboardRoot) {
     loadSubmissions().catch((error) => setAlert(dashboardAlert, error.message));
   });
 
-  refreshButton.addEventListener('click', () => {
-    if (activeDashboardView === 'seo') {
-      if (seoIsDirty && !window.confirm('Reload SEO profiles and discard your unsaved changes?')) {
-        return;
-      }
-      loadSeoProfiles().catch((error) => setAlert(seoAlert, error.message));
+  refreshSubmissionsButton.addEventListener('click', () => {
+    loadSubmissions().catch((error) => setAlert(dashboardAlert, error.message));
+  });
+
+  reloadSeoButton.addEventListener('click', async () => {
+    if (seoIsDirty && !window.confirm('Reload SEO profiles and discard your unsaved changes?')) {
       return;
     }
-    loadSubmissions().catch((error) => setAlert(dashboardAlert, error.message));
+    reloadSeoButton.disabled = true;
+    try {
+      await loadSeoProfiles();
+    } catch (error) {
+      setAlert(seoAlert, error.message || 'Unable to reload SEO profiles.');
+    } finally {
+      reloadSeoButton.disabled = false;
+    }
   });
 
   submissionsTab.addEventListener('click', () => {

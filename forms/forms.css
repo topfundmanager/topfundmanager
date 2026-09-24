@@ -304,6 +304,12 @@ main.forms-card {
   align-items: end;
 }
 
+.forms-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .forms-field {
   display: grid;
   gap: 0.45rem;
@@ -1127,6 +1133,10 @@ form:not([hidden]) {
   .forms-chip,
   .imported-forms-count {
     justify-content: flex-start;
+  }
+
+  .forms-toolbar__actions {
+    flex-wrap: wrap;
   }
 
   .seo-preview-column {
