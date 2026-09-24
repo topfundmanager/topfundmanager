@@ -98,9 +98,10 @@ read-only delivery endpoints:
 - Generated LLM context: `GET /api/seo/:siteId/llms.txt`
 - Generated crawler policy: `GET /api/seo/:siteId/robots.txt`
 
-Satellite sites must consume the JSON during their build/deployment and publish the generated
-metadata, JSON-LD, `llms.txt`, and crawler rules on their own domains. Saving a profile in the
-dashboard does not rewrite an external site's HTML by itself.
+The connected sites now read a separate, frozen published revision. Saving a profile does not
+change their live HTML. Apply `supabase/migrations/202609240001_site_seo_publications.sql`,
+deploy the connectors, then use **Publish to site** in the dashboard. See [SEO-PUBLISHING.md](SEO-PUBLISHING.md)
+for the rollout order, revision verification, and page-scope details.
 
 **Important:** For `FROM_EMAIL`, you need to either:
 - Verify your domain in Resend (recommended), or
