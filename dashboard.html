@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <title>Top Fund Manager Dashboard</title>
-    <link rel="stylesheet" href="/forms/forms.css?v=dashboard-responsive-20260924" />
+    <link rel="stylesheet" href="/forms/forms.css?v=dashboard-access-20260928" />
   </head>
   <body>
     <div class="forms-shell dashboard-shell" id="forms-dashboard">
@@ -24,6 +24,9 @@
           </button>
           <button class="workspace-tab" id="seo-tab" role="tab" aria-selected="false" aria-controls="seo-panel" type="button">
             SEO Center
+          </button>
+          <button class="workspace-tab" id="access-tab" role="tab" aria-selected="false" aria-controls="access-panel" type="button" hidden>
+            Access
           </button>
           <button class="workspace-tab workspace-tab--danger" id="logout" type="button">Log out</button>
         </nav>
@@ -357,9 +360,71 @@
             </div>
           </article>
         </section>
+        <section class="section" id="access-panel" role="tabpanel" aria-labelledby="access-tab" hidden>
+          <article class="forms-card imported-forms-panel">
+            <div class="imported-forms-panel__intro">
+              <p class="panel-card__tag">Access</p>
+              <h1>Dashboard Access</h1>
+              <p>Choose who can sign in and which sites each person can see. Owners see every site and manage this list.</p>
+            </div>
+
+            <div id="access-alert" class="forms-alert" hidden></div>
+
+            <form class="forms-toolbar access-form" id="access-form" novalidate>
+              <div class="access-form__grid">
+                <div class="forms-field">
+                  <label for="access-email">Email</label>
+                  <input id="access-email" name="email" type="email" autocomplete="off" required />
+                </div>
+                <div class="forms-field">
+                  <label for="access-role">Role</label>
+                  <select id="access-role" name="role">
+                    <option value="member">Member: only the sites checked below</option>
+                    <option value="owner">Owner: every site, and manages access</option>
+                  </select>
+                </div>
+              </div>
+
+              <fieldset class="access-sites" id="access-sites">
+                <legend>Sites this person can see</legend>
+                <label class="access-check access-check--all">
+                  <input type="checkbox" id="access-all-sites" />
+                  <span>All sites, including ones added later</span>
+                </label>
+                <div class="access-sites__list" id="access-site-list"></div>
+              </fieldset>
+
+              <div class="forms-actions">
+                <button class="forms-button primary" id="access-save" type="submit">Save access</button>
+                <button class="forms-button secondary" id="access-clear" type="button">Clear form</button>
+              </div>
+            </form>
+
+            <div class="imported-forms-list">
+              <div class="access-list__header">
+                <h2>People who can sign in</h2>
+                <div class="forms-chip" id="access-count">Loading</div>
+              </div>
+              <div class="imported-forms-table-wrap">
+                <table class="forms-table access-table">
+                  <thead>
+                    <tr>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Sites</th>
+                      <th>Last changed</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="access-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+        </section>
       </main>
     </div>
 
-    <script src="/forms/forms.js?v=dashboard-responsive-20260924"></script>
+    <script src="/forms/forms.js?v=dashboard-access-20260928"></script>
   </body>
 </html>

@@ -21,10 +21,42 @@ export const getAdminEmails = (env) => {
     .filter(Boolean);
 };
 
-export const isAllowedAdmin = (email, env) => {
-  const allowlist = getAdminEmails(env);
-  return allowlist.includes(normalizeEmail(email));
+// FORMS_ADMIN_EMAILS stays the break-glass owner list; everyone else is managed in forms_admin_users.
+export const getAccessForEmail = async (env, email) => {
+  const normalized = normalizeEmail(email);
+  if (!normalized) return null;
+
+  if (getAdminEmails(env).includes(normalized)) {
+    return { email: normalized, role: 'owner', allSites: true, siteIds: [], source: 'config' };
+  }
+
+  let rows;
+  try {
+    rows = await supabaseFetchJson(
+      env,
+      `/rest/v1/forms_admin_users?select=email,role,all_sites,site_ids&email=eq.${encodeURIComponent(normalized)}&limit=1`
+    );
+  } catch (error) {
+    console.error('Dashboard access lookup failed:', error);
+    return null;
+  }
+
+  const row = rows?.[0];
+  if (!row) return null;
+
+  const role = row.role === 'owner' ? 'owner' : 'member';
+  return {
+    email: normalized,
+    role,
+    allSites: role === 'owner' || row.all_sites === true,
+    siteIds: Array.isArray(row.site_ids) ? row.site_ids : [],
+    source: 'dashboard',
+  };
 };
+
+export const canAccessSite = (access, siteId) => Boolean(
+  access && (access.allSites || access.siteIds.includes(siteId))
+);
 
 export const getSupabaseConfig = (env) => {
   const url = env.SUPABASE_URL;
@@ -196,12 +228,18 @@ export const getSessionFromRequest = async (request, env) => {
   return session;
 };
 
+// Access is re-read on every request so removing someone takes effect immediately.
 export const requireSession = async (request, env) => {
   const session = await getSessionFromRequest(request, env);
   if (!session) {
     return null;
   }
-  return session;
+
+  const access = await getAccessForEmail(env, session.email);
+  if (!access) {
+    return null;
+  }
+  return { ...session, access };
 };
 
 export const getAllowedOrigins = (site) => {

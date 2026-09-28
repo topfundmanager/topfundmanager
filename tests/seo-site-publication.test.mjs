@@ -10,6 +10,7 @@ import { buildPublishedHead } from '../functions/seo-head.js';
 const env = {
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_SERVICE_ROLE_KEY: 'test-key',
+  FORMS_ADMIN_EMAILS: 'admin@example.com',
 };
 
 const json = (value, status = 200) => new Response(JSON.stringify(value), {

@@ -187,15 +187,30 @@ if (dashboardRoot) {
   const seoResetButton = document.getElementById('seo-reset');
   const seoPublishButton = document.getElementById('seo-publish');
   const seoVerifyButton = document.getElementById('seo-verify');
+  const accessTab = document.getElementById('access-tab');
+  const accessPanel = document.getElementById('access-panel');
+  const accessAlert = document.getElementById('access-alert');
+  const accessForm = document.getElementById('access-form');
+  const accessEmail = document.getElementById('access-email');
+  const accessRole = document.getElementById('access-role');
+  const accessAllSites = document.getElementById('access-all-sites');
+  const accessSiteList = document.getElementById('access-site-list');
+  const accessSaveButton = document.getElementById('access-save');
+  const accessClearButton = document.getElementById('access-clear');
+  const accessBody = document.getElementById('access-body');
+  const accessCount = document.getElementById('access-count');
   let activeModal = null;
   let seoProfiles = [];
   let activeSeoSiteId = '';
   let seoOriginalSignature = '';
   let seoIsDirty = false;
+  let accessLoaded = false;
+  let accessState = { users: [], configuredOwners: [], sites: [], currentEmail: '' };
 
   const loadSession = async () => {
     const data = await apiRequest('/api/forms/me');
     adminEmail.textContent = data.email;
+    accessTab.hidden = !data.canManageAccess;
   };
 
   const getSiteDisplayName = (siteId, siteName) => {
@@ -484,19 +499,30 @@ if (dashboardRoot) {
   };
 
   const setDashboardView = async (view) => {
-    const showingSeo = view === 'seo';
-    submissionsPanel.hidden = showingSeo;
-    seoPanel.hidden = !showingSeo;
-    submissionsTab.classList.toggle('workspace-tab--active', !showingSeo);
-    submissionsTab.setAttribute('aria-selected', String(!showingSeo));
-    seoTab.classList.toggle('workspace-tab--active', showingSeo);
-    seoTab.setAttribute('aria-selected', String(showingSeo));
-    if (showingSeo && !seoProfiles.length) {
+    [
+      ['submissions', submissionsTab, submissionsPanel],
+      ['seo', seoTab, seoPanel],
+      ['access', accessTab, accessPanel],
+    ].forEach(([name, tab, panel]) => {
+      const active = name === view;
+      panel.hidden = !active;
+      tab.classList.toggle('workspace-tab--active', active);
+      tab.setAttribute('aria-selected', String(active));
+    });
+    if (view === 'seo' && !seoProfiles.length) {
       try {
         await loadSeoProfiles();
       } catch (error) {
         setAlert(seoAlert, error.message || 'Unable to load SEO profiles.');
         seoRecordStatus.textContent = 'Load failed';
+      }
+    }
+    if (view === 'access' && !accessLoaded) {
+      try {
+        await loadAccess();
+      } catch (error) {
+        setAlert(accessAlert, error.message || 'Unable to load dashboard access.');
+        accessCount.textContent = 'Load failed';
       }
     }
   };
@@ -863,6 +889,144 @@ if (dashboardRoot) {
     renderSubmissions(data.submissions || []);
   };
 
+  const syncAccessSiteInputs = () => {
+    const isOwner = accessRole.value === 'owner';
+    if (isOwner) accessAllSites.checked = true;
+    accessAllSites.disabled = isOwner;
+    accessSiteList.querySelectorAll('input').forEach((input) => {
+      input.disabled = isOwner || accessAllSites.checked;
+    });
+  };
+
+  const resetAccessForm = () => {
+    accessForm.reset();
+    accessEmail.readOnly = false;
+    accessSaveButton.textContent = 'Save access';
+    syncAccessSiteInputs();
+  };
+
+  const renderAccessSiteOptions = () => {
+    accessSiteList.innerHTML = '';
+    accessState.sites.forEach((site) => {
+      const label = document.createElement('label');
+      label.className = 'access-check';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = site.site_id;
+      const text = document.createElement('span');
+      text.textContent = getSiteDisplayName(site.site_id, site.site_name);
+      label.append(input, text);
+      accessSiteList.appendChild(label);
+    });
+    syncAccessSiteInputs();
+  };
+
+  const describeAccessSites = (user) => {
+    if (user.role === 'owner' || user.allSites) return 'All sites';
+    const names = new Map(accessState.sites.map((site) => [site.site_id, getSiteDisplayName(site.site_id, site.site_name)]));
+    return user.siteIds.map((siteId) => names.get(siteId) || siteId).join(', ') || 'No sites';
+  };
+
+  const createAccessButton = (label, variant, onClick) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `forms-button ${variant}`;
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    return button;
+  };
+
+  const editAccessUser = (user) => {
+    clearAlert(accessAlert);
+    accessEmail.value = user.email;
+    accessEmail.readOnly = true;
+    accessRole.value = user.role;
+    accessAllSites.checked = user.allSites;
+    accessSiteList.querySelectorAll('input').forEach((input) => {
+      input.checked = user.siteIds.includes(input.value);
+    });
+    accessSaveButton.textContent = 'Update access';
+    syncAccessSiteInputs();
+    accessForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const removeAccessUser = async (user) => {
+    if (!window.confirm(`Remove dashboard access for ${user.email}? They will be signed out right away.`)) {
+      return;
+    }
+    clearAlert(accessAlert);
+    try {
+      await apiRequest(`/api/forms/access?email=${encodeURIComponent(user.email)}`, { method: 'DELETE' });
+      accessState.users = accessState.users.filter((item) => item.email !== user.email);
+      if (accessEmail.value === user.email) resetAccessForm();
+      renderAccessList();
+      setAlert(accessAlert, `${user.email} can no longer sign in.`, 'success');
+    } catch (error) {
+      setAlert(accessAlert, error.message || 'Unable to remove access.');
+    }
+  };
+
+  const renderAccessList = () => {
+    accessBody.innerHTML = '';
+    const people = [
+      ...accessState.configuredOwners.map((email) => ({ email, role: 'owner', allSites: true, siteIds: [], configured: true })),
+      ...accessState.users,
+    ];
+
+    people.forEach((user) => {
+      const row = document.createElement('tr');
+      row.className = 'forms-table__row access-table__row';
+      const changed = user.configured
+        ? 'Set in Cloudflare'
+        : `${formatTimestamp(user.updatedAt)}${user.updatedBy ? ` by ${user.updatedBy}` : ''}`;
+      [
+        ['Email', user.email],
+        ['Role', user.role === 'owner' ? 'Owner' : 'Member'],
+        ['Sites', describeAccessSites(user)],
+        ['Last changed', changed],
+      ].forEach(([label, value]) => {
+        const cell = document.createElement('td');
+        cell.dataset.label = label;
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+      const actions = document.createElement('td');
+      actions.dataset.label = 'Actions';
+      if (user.configured || user.email === accessState.currentEmail) {
+        actions.className = 'access-table__note';
+        actions.textContent = user.configured ? 'Change in Cloudflare (FORMS_ADMIN_EMAILS)' : 'You';
+      } else {
+        const buttons = document.createElement('div');
+        buttons.className = 'access-table__actions';
+        buttons.append(
+          createAccessButton('Edit', 'secondary', () => editAccessUser(user)),
+          createAccessButton('Remove', 'danger', () => removeAccessUser(user))
+        );
+        actions.appendChild(buttons);
+      }
+      row.appendChild(actions);
+      accessBody.appendChild(row);
+    });
+
+    accessCount.textContent = `${people.length} ${people.length === 1 ? 'person' : 'people'}`;
+  };
+
+  const loadAccess = async () => {
+    clearAlert(accessAlert);
+    accessCount.textContent = 'Loading';
+    const data = await apiRequest('/api/forms/access');
+    accessState = {
+      users: data.users || [],
+      configuredOwners: data.configuredOwners || [],
+      sites: data.sites || [],
+      currentEmail: data.currentEmail || '',
+    };
+    accessLoaded = true;
+    renderAccessSiteOptions();
+    renderAccessList();
+  };
+
   const initDashboard = async () => {
     try {
       await loadSession();
@@ -901,6 +1065,48 @@ if (dashboardRoot) {
 
   seoTab.addEventListener('click', () => {
     setDashboardView('seo');
+  });
+
+  accessTab.addEventListener('click', () => {
+    setDashboardView('access');
+  });
+
+  accessRole.addEventListener('change', syncAccessSiteInputs);
+  accessAllSites.addEventListener('change', syncAccessSiteInputs);
+
+  accessClearButton.addEventListener('click', () => {
+    clearAlert(accessAlert);
+    resetAccessForm();
+  });
+
+  accessForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearAlert(accessAlert);
+    accessSaveButton.disabled = true;
+    try {
+      const data = await apiRequest('/api/forms/access', {
+        method: 'PUT',
+        body: JSON.stringify({
+          email: accessEmail.value,
+          role: accessRole.value,
+          allSites: accessAllSites.checked,
+          siteIds: Array.from(accessSiteList.querySelectorAll('input:checked')).map((input) => input.value),
+        }),
+      });
+      accessState.users = [
+        ...accessState.users.filter((item) => item.email !== data.user.email),
+        data.user,
+      ].sort((a, b) => a.email.localeCompare(b.email));
+      renderAccessList();
+      resetAccessForm();
+      setAlert(accessAlert, data.created
+        ? `${data.user.email} can now sign in with a code sent to that address.`
+        : `Access updated for ${data.user.email}.`, 'success');
+    } catch (error) {
+      setAlert(accessAlert, error.message || 'Unable to save access.');
+    } finally {
+      accessSaveButton.disabled = false;
+    }
   });
 
   seoSiteSelect.addEventListener('change', () => {

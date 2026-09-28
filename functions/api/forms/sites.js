@@ -1,4 +1,4 @@
-import { errorResponse, jsonResponse, requireSession, supabaseFetchJson } from './utils.js';
+import { canAccessSite, errorResponse, jsonResponse, requireSession, supabaseFetchJson } from './utils.js';
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -9,7 +9,10 @@ export async function onRequestGet({ request, env }) {
 
     const sites = await supabaseFetchJson(env, '/rest/v1/forms_sites?select=site_id,site_name,allowed_origins&order=site_id.asc');
 
-    return jsonResponse({ success: true, sites });
+    return jsonResponse({
+      success: true,
+      sites: (sites || []).filter((site) => canAccessSite(session.access, site.site_id)),
+    });
   } catch (error) {
     return errorResponse(500, error.message || 'Unable to load sites.');
   }

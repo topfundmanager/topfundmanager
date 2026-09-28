@@ -1417,3 +1417,146 @@ form:not([hidden]) {
     margin-bottom: 0.2rem;
   }
 }
+
+/* Dashboard access */
+.forms-button.danger {
+  color: var(--danger);
+  background: rgba(211, 47, 47, 0.08);
+  border-color: rgba(211, 47, 47, 0.18);
+}
+
+.forms-button.danger:hover {
+  background: rgba(211, 47, 47, 0.14);
+  transform: translateY(-1px);
+}
+
+.forms-toolbar.access-form {
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+}
+
+.access-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.access-sites {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.access-sites legend {
+  margin-bottom: 0.45rem;
+  padding: 0;
+  color: var(--surface-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.access-sites__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.6rem;
+}
+
+.access-check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--surface-ink);
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.access-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.access-check:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.access-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.access-list__header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.forms-table tr.access-table__row {
+  cursor: default;
+}
+
+.access-table th:nth-child(1),
+.access-table td:nth-child(1) {
+  width: 28%;
+}
+
+.access-table th:nth-child(2),
+.access-table td:nth-child(2) {
+  width: 11%;
+}
+
+.access-table th:nth-child(3),
+.access-table td:nth-child(3) {
+  width: 25%;
+}
+
+.access-table th:nth-child(4),
+.access-table td:nth-child(4) {
+  width: 18%;
+}
+
+.access-table th:nth-child(5),
+.access-table td:nth-child(5) {
+  width: 18%;
+}
+
+.access-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.access-table__actions .forms-button {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 0.85rem;
+}
+
+.access-table__note {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 768px) {
+  .access-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .access-list__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
