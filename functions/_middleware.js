@@ -6,10 +6,34 @@ import {
 } from './api/seo/published-utils.js';
 import { applyPublishedHead } from './seo-head.js';
 
+// The Pages build output is the repository root, so keep repository internals off the site.
+const INTERNAL_PATH = /^\/(?:(?:supabase|tests|workers|site-connectors|node_modules)\/|\.(?!well-known\/)|package(?:-lock)?\.json$|wrangler(?:\.[\w-]+)?\.toml$)|\.md$/i;
+
+const isInternalPath = (pathname) => {
+  let path;
+  try {
+    path = decodeURIComponent(pathname);
+  } catch {
+    return true;
+  }
+  return INTERNAL_PATH.test(path.replace(/\/{2,}/g, '/'));
+};
+
 export async function onRequest(context) {
   const { request, env } = context;
-  if (request.method !== 'GET') return context.next();
   const path = new URL(request.url).pathname;
+  if (isInternalPath(path)) {
+    return new Response('Not Found', {
+      status: 404,
+      headers: {
+        'Cache-Control': 'no-store',
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Robots-Tag': 'noindex',
+      },
+    });
+  }
+
+  if (request.method !== 'GET') return context.next();
   if (!['/', '/index.html', '/llms.txt', '/robots.txt'].includes(path)) {
     return context.next();
   }
