@@ -1,4 +1,4 @@
-import { errorResponse, jsonResponse, requireSession, supabaseFetchJson } from './utils.js';
+import { canAccessSite, errorResponse, jsonResponse, requireSession, supabaseFetchJson } from './utils.js';
 
 const MAX_LIST_ITEMS = 40;
 const EDITABLE_FIELDS = [
@@ -200,10 +200,12 @@ export async function onRequestGet({ request, env }) {
 
     return jsonResponse({
       success: true,
-      profiles: (profiles || []).map(({ published_snapshot: _snapshot, ...profile }) => ({
-        ...profile,
-        site_name: siteNames.get(profile.site_id) || profile.site_id,
-      })),
+      profiles: (profiles || [])
+        .filter((profile) => canAccessSite(session.access, profile.site_id))
+        .map(({ published_snapshot: _snapshot, ...profile }) => ({
+          ...profile,
+          site_name: siteNames.get(profile.site_id) || profile.site_id,
+        })),
     });
   } catch (error) {
     return errorResponse(500, error.message || 'Unable to load SEO profiles.');
@@ -219,6 +221,9 @@ export async function onRequestPut({ request, env }) {
     const siteId = typeof body?.siteId === 'string' ? body.siteId.trim() : '';
     if (!/^[a-z0-9][a-z0-9_-]{1,63}$/.test(siteId)) {
       return errorResponse(400, 'A valid siteId is required.');
+    }
+    if (!canAccessSite(session.access, siteId)) {
+      return errorResponse(403, 'You do not have access to this site.');
     }
 
     const sites = await supabaseFetchJson(

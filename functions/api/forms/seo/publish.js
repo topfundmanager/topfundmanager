@@ -1,4 +1,4 @@
-import { errorResponse, jsonResponse, requireSession, supabaseFetchJson } from '../utils.js';
+import { canAccessSite, errorResponse, jsonResponse, requireSession, supabaseFetchJson } from '../utils.js';
 
 const LIVE_PAGES = Object.freeze({
   ghicontractors: 'https://ghicontractors.com/',
@@ -87,6 +87,9 @@ export async function onRequestPost({ request, env }) {
     const siteId = typeof body.siteId === 'string' ? body.siteId.trim() : '';
     if (!Object.hasOwn(LIVE_PAGES, siteId)) {
       return errorResponse(400, 'This site has no configured SEO publisher.', noStore);
+    }
+    if (!canAccessSite(session.access, siteId)) {
+      return errorResponse(403, 'You do not have access to this site.', noStore);
     }
     const action = body.action || 'publish';
     if (!['publish', 'verify'].includes(action)) {

@@ -2,6 +2,7 @@ import {
   buildSessionCookie,
   errorResponse,
   generateToken,
+  getAccessForEmail,
   getRequestMeta,
   jsonResponse,
   normalizeEmail,
@@ -35,6 +36,10 @@ export async function onRequestPost({ request, env }) {
     const codeHash = await hashString(`code:${code}:${email}:${challengeId}`);
     if (codeHash !== record.code_hash) {
       return errorResponse(401, 'Invalid or expired code.');
+    }
+
+    if (!(await getAccessForEmail(env, email))) {
+      return errorResponse(403, 'Email is not authorized.');
     }
 
     await supabaseFetchJson(env, `/rest/v1/forms_auth_codes?id=eq.${encodeURIComponent(challengeId)}`, {

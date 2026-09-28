@@ -9,6 +9,7 @@ import { onRequestGet as getRobotsText } from '../functions/api/seo/[siteId]/rob
 const env = {
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
+  FORMS_ADMIN_EMAILS: 'admin@example.com',
 };
 
 const jsonResponse = (value, status = 200) => new Response(JSON.stringify(value), {

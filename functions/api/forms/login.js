@@ -2,8 +2,8 @@ import {
   buildCodeEmail,
   errorResponse,
   generateCode,
+  getAccessForEmail,
   getRequestMeta,
-  isAllowedAdmin,
   jsonResponse,
   normalizeEmail,
   sendResendEmail,
@@ -20,7 +20,7 @@ export async function onRequestPost({ request, env }) {
       return errorResponse(400, 'Email is required.');
     }
 
-    if (!isAllowedAdmin(email, env)) {
+    if (!(await getAccessForEmail(env, email))) {
       return errorResponse(403, 'Email is not authorized.');
     }
 
