@@ -1,0 +1,11 @@
+# Local verification receipt — October 21, 2026
+
+No production deploy, production configuration/data migration or real email sending occurred. Google OAuth consent, authenticated Pub/Sub delivery, Gmail Sent/threading and actual recipient delivery remain unverified until authorized client setup and live tests.
+
+- Complete test command, with both opt-in suites enabled: **37 tests passed, zero failed, zero skipped**. Includes 19 mocked provider/application/security tests, 10 PostgreSQL transactional subtests plus their parent, one browser acceptance test and six existing SEO tests.
+- The additive migration was applied to an isolated local PostgreSQL 17 database, then rebuilt by the database suite. Concurrent independent PostgreSQL connections verified immutable duplicate send submission, one active lease per mailbox, fenced checkpoints, crash-to-uncertain recovery, coalesced/out-of-order notifications, controlled resync pruning, mailbox-scoped provider identity, reconnect, OAuth state replay/expiry/browser binding, bounded atomic login-code consumption, and denied browser-role RPC/table access.
+- Installed Chrome with mocked API routes verified sender/recipient review, failed-send draft preservation, transport-ambiguous submission locking, safe text rendering of hostile message markup, draft recovery after tab switching, Submissions/SEO switching, and no horizontal overflow at 390 × 844. Desktop at 1440 × 1000 was also rendered and visually inspected. Fixture screenshots are `/tmp/tfm-email-mobile.png` and `/tmp/tfm-email-desktop.png`; they contain synthetic data only.
+- Cloudflare Pages Functions compiled locally. The separate email Worker compiled via `wrangler deploy --dry-run`, with `EMAIL_WORKER_ENABLED=false`. No deploy command without `--dry-run` was run.
+- `git diff --check` passed. The pre-existing untracked inquiry-summary endpoint, migration, Worker and configuration were not edited.
+
+Reproduction and the remaining live acceptance sequence are in [operations.md](operations.md). Opt-in suites require a dedicated disposable local database and a local Playwright/Chrome installation; the default `npm test` explicitly skips them when those settings are absent.

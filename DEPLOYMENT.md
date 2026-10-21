@@ -230,3 +230,12 @@ The following files were created/modified to convert from WordPress to static:
 - Always use environment variables for sensitive data
 - The form includes input validation and XSS protection
 - Consider adding rate limiting in production
+
+## Gmail dashboard Email tab
+
+The additive Gmail integration has a separate disabled-by-default scheduled Worker,
+Supabase migration and Google/Pub/Sub setup. See [Email operations](docs/email/operations.md)
+for activation, environment names, testing, retention, recovery and rollback, and
+[implementation map](docs/email/implementation.md) for boundaries and API contracts.
+The login hardening RPCs in the email migration must accompany the updated login routes.
+No Gmail deployment or real-email acceptance is implied by code availability.

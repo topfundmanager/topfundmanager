@@ -6,6 +6,7 @@
     <meta name="robots" content="noindex" />
     <title>Top Fund Manager Dashboard</title>
     <link rel="stylesheet" href="/forms/forms.css?v=dashboard-responsive-20260924" />
+    <link rel="stylesheet" href="/forms/email.css?v=20261021" />
   </head>
   <body>
     <div class="forms-shell dashboard-shell" id="forms-dashboard">
@@ -25,6 +26,7 @@
           <button class="workspace-tab" id="seo-tab" role="tab" aria-selected="false" aria-controls="seo-panel" type="button">
             SEO Center
           </button>
+          <button class="workspace-tab" id="email-tab" role="tab" aria-selected="false" aria-controls="email-panel" type="button">Email</button>
           <button class="workspace-tab workspace-tab--danger" id="logout" type="button">Log out</button>
         </nav>
       </header>
@@ -357,9 +359,23 @@
             </div>
           </article>
         </section>
+        <section id="email-panel" class="section" role="tabpanel" aria-labelledby="email-tab" hidden>
+          <article class="forms-card email-card">
+            <div class="email-heading"><div><p class="panel-card__tag">Correspondence</p><h1>Email</h1></div><button class="forms-button secondary" type="button" id="email-refresh">Refresh</button></div>
+            <p class="email-note">Conversations from your permitted mailboxes, including sent replies. Opening mail here leaves Gmail read and archive state unchanged. Bodies appear as plain text; remote images are blocked.</p>
+            <p id="email-alert" role="status" aria-live="polite"></p>
+            <details id="email-connections"><summary>Mailbox connections</summary><div id="email-health"></div><p>Initial import is limited to the configured history window (30 days by default). It is not the full mailbox archive. Disconnect stops sync and sending; cached mail remains until administrator deletion.</p></details>
+            <label for="email-filter">Mailbox</label><select id="email-filter"><option value="">All permitted mailboxes</option></select>
+            <div class="email-layout">
+              <div class="email-list-pane"><h2>Conversations</h2><div id="email-list"></div><button id="email-more" type="button" hidden>Load more</button></div>
+              <div id="email-reader" class="email-reader"><p>Select a conversation to read and reply.</p></div>
+            </div>
+          </article>
+        </section>
       </main>
     </div>
 
-    <script src="/forms/forms.js?v=dashboard-responsive-20260924"></script>
+    <script src="/forms/email.js?v=20261021" defer></script>
+    <script src="/forms/forms.js?v=dashboard-responsive-20261021" defer></script>
   </body>
 </html>

@@ -8,7 +8,9 @@
     "dev": "wrangler pages dev . --live-reload",
     "deploy": "wrangler pages deploy .",
     "preview": "wrangler pages dev .",
-    "test:seo": "node --test tests/seo-*.test.mjs"
+    "test:seo": "node --test tests/seo-*.test.mjs",
+    "test:email": "node --test tests/email/*.test.mjs",
+    "test": "node --test tests/seo-*.test.mjs tests/email/*.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^3.0.0"

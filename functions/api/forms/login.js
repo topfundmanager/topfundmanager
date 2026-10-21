@@ -32,18 +32,10 @@ export async function onRequestPost({ request, env }) {
 
     const codeHash = await hashString(`code:${code}:${email}:${challengeId}`);
 
-    await supabaseFetchJson(env, '/rest/v1/forms_auth_codes', {
-      method: 'POST',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({
-        id: challengeId,
-        email,
-        code_hash: codeHash,
-        expires_at: expiresAt,
-        ip,
-        user_agent: userAgent,
-      }),
+    const issued = await supabaseFetchJson(env, '/rest/v1/rpc/forms_issue_code', {
+      method: 'POST', body: JSON.stringify({p_id:challengeId,p_email:email,p_hash:codeHash,p_expires:expiresAt,p_ip:ip,p_agent:userAgent}),
     });
+    if (!issued) return errorResponse(429, 'Too many login codes requested. Try again later.');
 
     const fromEmail = env.FORMS_FROM_EMAIL || env.FROM_EMAIL || 'noreply@updates.topfundmanager.com';
     const subject = 'Your Forms Admin Code';
@@ -63,6 +55,6 @@ export async function onRequestPost({ request, env }) {
       expiresInMinutes: expiresMinutes,
     });
   } catch (error) {
-    return errorResponse(500, error.message || 'Unable to send code.');
+    return errorResponse(500, 'Unable to send code.');
   }
 }

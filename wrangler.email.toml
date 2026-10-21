@@ -1,0 +1,8 @@
+name = "topfundmanager-email"
+main = "workers/email-cron.js"
+compatibility_date = "2026-10-01"
+[triggers]
+crons = ["* * * * *"]
+[vars]
+EMAIL_WORKER_ENABLED = "false"
+# Configure independently from Pages. See docs/email/operations.md.

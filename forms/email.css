@@ -1,0 +1,40 @@
+.email-card {padding:clamp(16px,3vw,32px);min-width:0}
+.email-heading {display:flex;align-items:center;justify-content:space-between;gap:16px}
+.email-heading h1 {margin:0;font-size:28px}
+.email-note, #email-connections p {color:#596579;font-size:14px;line-height:1.6}
+#email-alert {white-space:pre-wrap;color:#8b3d24;min-height:24px}
+#email-connections {padding:14px 0;border-block:1px solid #e3e7ed;margin-bottom:18px}
+#email-connections summary {cursor:pointer;font-weight:600}
+.email-health-row {display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px 0;border-bottom:1px solid #eef1f4;overflow-wrap:anywhere}
+.email-health-row span {flex:1;min-width:180px;white-space:pre-line;font-size:13px}
+#email-filter {width:100%;max-width:400px;margin:6px 0 20px;min-height:44px}
+.email-layout {display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2fr);gap:24px}
+.email-layout h2 {font-size:19px;margin:0 0 16px}
+.email-list-pane {min-width:0}
+.email-thread {display:block;width:100%;text-align:left;background:#fff;border:1px solid #dce2e8;border-radius:8px;padding:14px;margin-bottom:8px;white-space:normal;overflow-wrap:anywhere;color:#182b45;cursor:pointer}
+.email-thread:hover,.email-thread[aria-current=true] {background:#f0f5fa;border-color:#728da9}
+.email-thread strong,.email-thread small {display:block;line-height:1.5}
+.email-thread small {font-weight:400;color:#596579}
+.email-reader {border-left:1px solid #e3e7ed;padding-left:24px;min-width:0;overflow-wrap:anywhere}
+.email-message {padding:16px 0;border-bottom:1px solid #e3e7ed}
+.email-message pre {white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.6 system-ui,sans-serif;color:#263649;background:#f8fafc;padding:16px;border-radius:8px;max-height:560px;overflow:auto}
+.email-message p {font-size:13px;white-space:pre-line}
+.email-message a {display:inline-block;margin:5px 10px 5px 0}
+.email-compose {display:grid;gap:12px;margin-top:20px}
+.email-compose textarea {width:100%;box-sizing:border-box;min-height:180px;resize:vertical;font:16px/1.5 system-ui,sans-serif;padding:12px}
+.email-compose select,.email-compose button,.email-card button {min-height:44px;cursor:pointer}
+.email-compose button:disabled {opacity:.6;cursor:wait}
+.email-review {padding:16px;border:2px solid #38617f;border-radius:8px;background:#f1f7fb;white-space:pre-wrap;overflow-wrap:anywhere}
+.email-review pre {white-space:pre-wrap;font:inherit;max-height:260px;overflow:auto}
+@media(max-width:720px) {.email-layout{grid-template-columns:minmax(0,1fr)}.email-reader{border-left:0;border-top:1px solid #e3e7ed;padding:20px 0 0}.email-heading{align-items:flex-start}.email-thread{padding:12px}.email-health-row button{flex:1} .workspace-tabs{flex-wrap:wrap}}
+.email-compose {grid-template-columns:minmax(0,1fr)}
+.email-compose > * {min-width:0;max-width:100%}
+.email-compose select, #email-filter {width:100%;min-width:0;border:1px solid var(--border);border-radius:10px;background:#fff;padding:10px;color:var(--text);text-overflow:ellipsis}
+.email-compose textarea {border:1px solid var(--border);border-radius:10px}
+.email-card button:not(.email-thread) {border:1px solid var(--border);border-radius:10px;background:#f0f5fa;color:#164a77;padding:10px 16px;font-weight:600}
+.email-card button:not(.email-thread):hover {background:#e3edf8}
+.email-card :focus-visible {outline:3px solid #0071e3;outline-offset:3px}
+.dashboard-content .email-card {padding:clamp(16px,3vw,32px);gap:14px}
+.email-card > p {margin:0}
+#email-alert:empty {display:none}
+.email-compose > div:last-child {display:grid;gap:10px}

@@ -5,6 +5,7 @@ import {
   getRequestMeta,
   jsonResponse,
   normalizeEmail,
+  isAllowedAdmin,
   supabaseFetchJson,
   hashString,
 } from './utils.js';
@@ -20,28 +21,14 @@ export async function onRequestPost({ request, env }) {
       return errorResponse(400, 'Email, code, and challenge ID are required.');
     }
 
+    if (!isAllowedAdmin(email, env)) return errorResponse(403, 'Email is not authorized.');
+    if (!/^[0-9a-f-]{36}$/i.test(challengeId) || !/^\d{6}$/.test(code)) return errorResponse(401, 'Invalid or expired code.');
     const now = new Date().toISOString();
-    const query = `/rest/v1/forms_auth_codes?select=id,code_hash,expires_at,consumed_at&email=eq.${encodeURIComponent(
-      email
-    )}&id=eq.${encodeURIComponent(challengeId)}&consumed_at=is.null&expires_at=gt.${encodeURIComponent(now)}&limit=1`;
-
-    const records = await supabaseFetchJson(env, query);
-    const record = records?.[0];
-
-    if (!record) {
-      return errorResponse(401, 'Invalid or expired code.');
-    }
-
     const codeHash = await hashString(`code:${code}:${email}:${challengeId}`);
-    if (codeHash !== record.code_hash) {
-      return errorResponse(401, 'Invalid or expired code.');
-    }
-
-    await supabaseFetchJson(env, `/rest/v1/forms_auth_codes?id=eq.${encodeURIComponent(challengeId)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ consumed_at: now }),
+    const consumed = await supabaseFetchJson(env, '/rest/v1/rpc/forms_consume_code', {
+      method: 'POST', body: JSON.stringify({ p_id: challengeId, p_email: email, p_hash: codeHash }),
     });
+    if (!consumed) return errorResponse(401, 'Invalid or expired code.');
 
     const token = generateToken();
     const tokenHash = await hashString(`session:${token}`);
@@ -71,6 +58,6 @@ export async function onRequestPost({ request, env }) {
       }
     );
   } catch (error) {
-    return errorResponse(500, error.message || 'Unable to verify code.');
+    return errorResponse(500, 'Unable to verify code.');
   }
 }

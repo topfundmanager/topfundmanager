@@ -485,10 +485,15 @@ if (dashboardRoot) {
 
   const setDashboardView = async (view) => {
     const showingSeo = view === 'seo';
-    submissionsPanel.hidden = showingSeo;
+    const showingEmail = view === 'email';
+    document.getElementById('email-panel').hidden = !showingEmail;
+    document.getElementById('email-tab').classList.toggle('workspace-tab--active', showingEmail);
+    document.getElementById('email-tab').setAttribute('aria-selected', String(showingEmail));
+    if (showingEmail) window.dispatchEvent(new Event('email-open'));
+    submissionsPanel.hidden = showingSeo || showingEmail;
     seoPanel.hidden = !showingSeo;
-    submissionsTab.classList.toggle('workspace-tab--active', !showingSeo);
-    submissionsTab.setAttribute('aria-selected', String(!showingSeo));
+    submissionsTab.classList.toggle('workspace-tab--active', !showingSeo && !showingEmail);
+    submissionsTab.setAttribute('aria-selected', String(!showingSeo && !showingEmail));
     seoTab.classList.toggle('workspace-tab--active', showingSeo);
     seoTab.setAttribute('aria-selected', String(showingSeo));
     if (showingSeo && !seoProfiles.length) {
@@ -898,6 +903,9 @@ if (dashboardRoot) {
   submissionsTab.addEventListener('click', () => {
     setDashboardView('submissions');
   });
+
+  document.getElementById('email-tab').addEventListener('click', () => setDashboardView('email'));
+  if (window.location.hash === '#email') setDashboardView('email');
 
   seoTab.addEventListener('click', () => {
     setDashboardView('seo');
